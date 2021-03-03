@@ -1,0 +1,60 @@
+{%- extends "layout.html" -%}
+{%- set title = __('Authenticate') -%}
+{%- set hidden_content = True -%}
+{%- block content -%}
+	<div class="d-flex align-items-center row" style="height: calc(100vh - 3.5rem);">
+		<div>
+			<div class="text-center">
+				{%- for ascii in ascii_img -%}
+					<pre class="m-0 p-0">{{ ascii }}</pre>
+				{%- endfor -%}
+			</div>
+			<div class="card shadow-sm p-3 col-12 offset-sm-1 col-sm-10 offset-md-3 col-md-6 offset-lg-4 col-lg-4">
+				<form id="signInForm" actions="" method="post">
+					{{ form.csrf_token }}
+					<div class="row g-3">
+						<div class="offset-1 col-10 text-center form-floating mb-1">
+							<input autofocus type="password" class="form-control form-control-sm text-center" id="{{ form.pin.label.text }}" name="{{ form.pin.label.text }}" placeholder="{{ __('Personal Identification Number (PIN)') }}" value="{{ form.pin.data|default('', True) }}" {%- if form.password.data -%}{{ ' readonly' }}{%- endif -%} />
+							<label style="color: lightgrey; right: 0;" for="{{ form.pin.label.text }}">{{ __('Personal Identification Number (PIN)') }}</label>
+						</div>
+						{%- if form.password.data -%}
+							<div class="offset-1 col-10 text-center form-floating mb-1">
+								<input type="text" class="form-control form-control-sm text-center" id="{{ form.password.label.text }}" name="{{ form.password.label.text }}" placeholder="{{ __('Password') }}" value="{{ form.password.data|default('', True) }}" />
+								<label style="color: lightgrey; right: 0;" for="{{ form.password.label.text }}">{{ __('Password') }}</label>
+							</div>
+						{%- else -%}
+								<input type="text" class="d-none" id="{{ form.password.label.text }}" name="{{ form.password.label.text }}" placeholder="{{ __('Password') }}" value="{{ form.password.data|default('', True) }}" />
+						{%- endif -%}
+						<div class="offset-1 col-10 text-center form-floating mb-1">
+							<input type="submit" class="btn btn-block btn-sm btn-outline-dark" id="{{ form.submit.label.text }}" name="{{ form.submit.label.text }}" value="{{ __('Submit') }}" />
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+{%- endblock -%}
+{%- block body_script -%}
+	<script type="text/javascript">
+		$(window).on('load', function() {
+			if ($("#{{ form.password.label.text }}").val()) {
+				setInterval(verifyPin, 5000);
+			}
+		});
+		function verifyPin() {
+			$.ajax({
+				type: "post",
+				async: false,
+				url: $("#signInForm").attr("actions"),
+				data: $("#signInForm").serialize(),
+				success: function (data, textStatus, request) {
+					if (data.redirect) {
+						location.pathname = data.redirect;
+					} else if (!data.wait) {
+						location.href = location.origin;
+					}
+				}
+			});
+		}
+	</script>	
+{%- endblock -%}

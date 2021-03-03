@@ -1,0 +1,64 @@
+{%- set basename = __config('name') -%}
+<!DOCTYPE html>
+<html>
+	<head lang="en">
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.0-alpha14/css/tempusdominus-bootstrap-4.min.css" />
+		<link rel="preconnect" href="https://fonts.gstatic.com">
+		<link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/open-iconic/1.1.1/font/css/open-iconic-bootstrap.min.css" integrity="sha256-BJ/G+e+y7bQdrYkS2RBTyNfBHpA9IuGaPmf9htub5MQ=" crossorigin="anonymous"/>
+		<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon_w.ico') }}?v=1.0"/>
+		{%- block style -%}{%- endblock -%}
+		<title>{{ __(basename) }}{%- if title -%}{{ ': ' + title }}{%- endif -%}</title>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.4.2/umd/popper.min.js" integrity="sha256-XahKYIZhnEztrOcCTmaEErjYDLoLqBoDJbVMYybyjH8=" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.5.4/umd/popper.min.js" integrity="sha512-7yA/d79yIhHPvcrSiB8S/7TyX0OxlccU8F/kuB8mHYjLlF1MInPbEohpoqfz0AILoq5hoD7lELZAYYHbyeEjag==" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment-with-locales.min.js" integrity="sha256-wdiCkHJlqyoIJxG49WbDO0D3/EnppQp6GVOGQA6PBkA=" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.31/moment-timezone-with-data.min.js" integrity="sha256-E10X63Z5YvTXDfZjb0Kqd7FOo6a/gE7hFGcYm63PLmM=" crossorigin="anonymous"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.0-alpha14/js/tempusdominus-bootstrap-4.min.js"></script>
+    {%- block script -%}{%- endblock -%}
+	</head>
+	<body style="font-family: 'Russo One', sans-serif;">
+		<div class="container-fluid">
+			<header id="nav" class="w-100 p-2" style="position: fixed; bottom: 0; right: 0; left: 0; z-index=1001;">
+				<div class="card shadow-sm g-1 col-12 offset-md-1 col-md-10 offset-lg-2 col-lg-8" style="padding: 0.5rem; border-radius: 1.5rem;">
+					<div class="d-flex justify-content-between">
+						<a class="d-flex align-items-center" href="#">
+							<h5 class="m-0">
+								<div class="d-inline-block m-0 p-0 bg-dark text-light text-center" style="border-radius: 1rem; width: 1.5rem;">A</div><div class="d-none d-sm-inline-block m-0 p-0 text-dark">VATAR</div><div class="d-inline-block d-sm-none m-0 p-0 text-dark" style="font-size: 0.6rem;">VATAR</div>
+							</h5>
+						</a>
+						<a class="d-flex align-items-center" href="#">
+							<h5 class="m-0">
+								<div class="d-inline-block m-0 p-0 bg-dark text-light text-center" style="border-radius: 1rem; width: 1.5rem;">P</div><div class="d-none d-sm-inline-block m-0 p-0 text-dark">LAYLIST</div><div class="d-inline-block d-sm-none m-0 p-0 text-dark" style="font-size: 0.6rem;">LAYLIST</div>
+							</h5>
+						</a>
+						<a class="d-flex align-items-center" href="#">
+							<h5 class="m-0">
+								<div class="d-inline-block m-0 p-0 bg-dark text-light text-center" style="border-radius: 1rem; width: 1.5rem;">G</div><div class="d-none d-sm-inline-block m-0 p-0 text-dark">ALLERY</div><div class="d-inline-block d-sm-none m-0 p-0 text-dark" style="font-size: 0.6rem;">ALLERY</div>
+							</h5>
+						</a>
+						<a id="toggleOpacity" class="d-flex align-items-center" href="#">
+							<h5 class="m-0">
+								<div class="d-inline-block m-0 p-0 bg-dark text-light text-center" style="border-radius: 1rem; width: 5rem;">HIDE</div>
+							</h5>
+						</a>
+					</div>
+				</div>
+			</header>
+			{%- block content -%}{%- endblock -%}
+		</div>
+		<script type="text/javascript">
+			$("#toggleOpacity").on("click", function() {
+				if ($("#nav").css("opacity") == 0) {
+					$("#nav").fadeTo(1000, 100);
+				} else {
+					$("#nav").fadeTo(1000, 0);
+				}
+			});
+		</script>
+    {%- block body_script -%}{%- endblock -%}
+	</body>
+</html>

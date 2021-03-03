@@ -1,0 +1,23 @@
+{%- extends "layout.html" -%}
+{%- set title = __('Authenticate') -%}
+{%- set hidden_content = True -%}
+{%- block content -%}
+	<div class="d-flex align-items-center row" style="height: calc(100vh - 3.5rem);">
+		<div>
+			<div class="text-center">
+				{%- for ascii in ascii_img -%}
+					<pre class="m-0 p-0">{{ ascii }}</pre>
+				{%- endfor -%}
+			</div>
+			{%- if current_user.is_authenticated -%}
+				<div class="text-center w-100">
+					<div class="d-inline">{{ current_user.user.first_name }}</div>
+					<div class="d-inline">{{ current_user.user.last_name }}</div>
+				</div>
+				<a href="{{ url_for('base.sign_out') }}" class="offset-3 col-6 offset-sm-4 col-sm-4 offset-lg-5 col-lg-2 btn btn-sm btn-outline-dark">{{ __('Sign Out') }}</a>
+			{%- else -%}
+				<a href="{{ url_for('base.sign_in') }}" class="offset-3 col-6 offset-sm-4 col-sm-4 offset-lg-5 col-lg-2 btn btn-sm btn-outline-dark">{{ __('Sign In') }}</a>
+			{%- endif -%}
+		</div>
+	</div>
+{%- endblock -%}
