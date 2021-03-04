@@ -2,7 +2,7 @@
 	"name": "IDENTICA",
 	"token": "1411351548:AAENHgrIH1576uQK6CdHYrWSbKlGCgLV1dU",
 	"website": "Avatar",
-	"auth_url": "https://192.168.40.150:5000/account/identica/%s",
+	"auth_url": "http://192.168.44.150:5000/identica/%s",
 	"bot_url": {
 		"setMyCommands": "https://api.telegram.org/bot%s/setMyCommands",
 		"getUpdates": "https://api.telegram.org/bot%s/getUpdates",

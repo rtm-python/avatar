@@ -181,7 +181,7 @@ def __(key: str) -> str:
 	return key
 
 
-def get_value(name: str, default) -> object:
+def get_value(name: str, value_type, default) -> object:
 	"""
 	Return cast to default type value from request or session.
 	"""
@@ -189,15 +189,15 @@ def get_value(name: str, default) -> object:
 		value = args.get(name)
 		if value is not None:
 			try:
-				default_type = type(default)
-				if default_type is int:
+				if value_type is int:
 					return int(value)
-				elif default_type is str:
+				elif value_type is str:
 					return str(value)
-				elif define_type is bool:
+				elif value_type is bool:
 					return value == 'true' or value == 'True' or 						value == 'on' or value is True
 			except:
 				logging.warning('Value casting error!')
+	return default
 
 
 def set_value(name: str, value: int) -> None:

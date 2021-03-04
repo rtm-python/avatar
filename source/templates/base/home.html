@@ -1,10 +1,9 @@
 {%- extends "layout.html" -%}
-{%- set title = __('Authenticate') -%}
-{%- set hidden_content = True -%}
+{%- set hidden_content = False -%}
 {%- block content -%}
-	<div class="d-flex align-items-center row" style="height: calc(100vh - 3.5rem);">
+	<div class="d-flex align-items-center row" style="height: calc(100vh - 5rem);">
 		<div>
-			<div class="text-center">
+			<div class="text-center mb-4" style="font-size: 0.5rem;">
 				{%- for ascii in ascii_img -%}
 					<pre class="m-0 p-0">{{ ascii }}</pre>
 				{%- endfor -%}
@@ -16,7 +15,13 @@
 				</div>
 				<a href="{{ url_for('base.sign_out') }}" class="offset-3 col-6 offset-sm-4 col-sm-4 offset-lg-5 col-lg-2 btn btn-sm btn-outline-dark">{{ __('Sign Out') }}</a>
 			{%- else -%}
-				<a href="{{ url_for('base.sign_in') }}" class="offset-3 col-6 offset-sm-4 col-sm-4 offset-lg-5 col-lg-2 btn btn-sm btn-outline-dark">{{ __('Sign In') }}</a>
+				{%- if url_token -%}
+					<form actions="" method="post">
+						<input type="submit" class="offset-3 col-6 offset-sm-4 col-sm-4 offset-lg-5 col-lg-2 btn btn-sm btn-outline-dark" value="{{ __('Activate Token') }}" />
+					</form>
+				{%- else -%}
+					<a href="{{ url_for('base.sign_in') }}" class="offset-3 col-6 offset-sm-4 col-sm-4 offset-lg-5 col-lg-2 btn btn-sm btn-outline-dark">{{ __('Sign In') }}</a>
+				{%- endif -%}
 			{%- endif -%}
 		</div>
 	</div>

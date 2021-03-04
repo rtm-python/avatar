@@ -506,7 +506,7 @@ class IdenticaManager():
 			logging.warning('URL invalid: %s' % pin_filename)
 			return
 		os.remove(url_filename)
-		return url_data['from']
+		return { 'from': url_data['from'] }
 
 	@staticmethod
 	def get_password(pin: str) -> str:

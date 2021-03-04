@@ -1,0 +1,105 @@
+{%- extends "layout.html" -%}
+{%- set title = __('Gallery (Soundfiles Catalog)') -%}
+{%- set toolbox_links = [create_links, reorder_links] -%}
+{%- if pagination.page_count > 1 -%}
+	{%- set col_md_size = 9 -%}
+{%- else -%}
+	{%- set col_md_size = 12 -%}
+{%- endif -%}
+{%- set pagination_toolbox -%}
+	<div class="row">
+		<form class="col-12 col-md-{{ col_md_size }} pt-2 pb-3" method="post" actions="">
+			{{ filter.csrf_token }}
+			<div class="row p-1 g-3">
+				<div class="col-12 col-sm-4">
+					<small>{{ __('Name') }}</small>
+					<input autofocus type="text" class="form-control form-control-sm" id="{{ filter.prefix + filter.name.label.text }}" name="{{ filter.prefix + filter.name.label.text }}" placeholder="{{ __('Name') }}" value="{{ filter.name.data|default('', True) }}" />	
+				</div>
+				<div class="col-12 col-sm-4">
+					<small>{{ __('Description') }}</small>
+					<input type="text" class="form-control form-control-sm" id="{{ filter.prefix + filter.description.label.text }}" name="{{ filter.prefix + filter.description.label.text }}" placeholder="{{ __('Description') }}" value="{{ filter.description.data|default('', True) }}" />
+				</div>
+				<div class="col-12 col-sm-4">
+					<small>{{ __('Filename') }}</small>
+					<input type="text" class="form-control form-control-sm" id="{{ filter.prefix + filter.filename.label.text }}" name="{{ filter.prefix + filter.filename.label.text }}" placeholder="{{ __('Filename') }}" value="{{ filter.filename.data|default('', True) }}" />	
+				</div>
+				<div class="col-12 col-sm-2">
+					<small>{{ __('Used') }}</small>
+					<select class="form-select form-select-sm" id="{{ filter.prefix + filter.used.label.text }}" name="{{ filter.prefix + filter.used.label.text }}">
+						{%- for choice in filter.used.choices -%}
+							<option value="{{ choice[0] }}"{%- if filter.used.data == choice[0] -%}{{ ' selected' }}{%- endif -%}>{{ __(choice[1]) }}</option>
+						{%- endfor -%}
+					</select>
+				</div>
+				<div class="col-12 col-sm-4">
+					<small class="d-block d-sm-none" style="color: transparent; margin: -10px;">_</small>
+					<div class="row g-3">
+						<div class="col-6">
+							<small class="d-none d-sm-inline" style="color: transparent;">_</small>
+							<input type="submit" class="w-100 btn btn-sm btn-block btn-outline-light" name="{{ filter.prefix + filter.submit.label.text }}" id="{{ filter.prefix + filter.submit.label.text }}" value="{{ __('Apply') }}" />
+						</div>
+						<div class="col-6">
+							<small class="d-none d-sm-inline" style="color: transparent;">_</small>
+							<a href="{{ url_for('gallery.get_soundfile_catalog', soundfileCatalogFilterReset='true') }}" class="w-100 btn btn-sm btn-block btn-outline-light">{{ __('Reset') }}</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+{%- endset -%}
+{%- block content -%}
+	<div class="col-12 offset-md-1 col-md-10 offset-lg-2 col-lg-8">
+		<div class="row row-cols-1 g-4" id="sortable">
+			{%- for soundfile in soundfile_list -%}
+				<div class="col">
+					<div class="soundfile-uid d-none" id="{{ soundfile.uid }}"></div>
+					<div class="card h-100">
+						<div class="card-body">
+							<a href="{{ url_for('gallery.update_soundfile', uid=soundfile.uid) }}" class="stretched-link"></a>
+							<h5 class="card-title">
+								<div class="col-12">{{ soundfile.name }}</div>
+							</h5>
+							{%- if soundfile.description -%}
+								<div class="col-12">{{ soundfile.description }}</div>
+							{%- endif -%}
+							{%- if soundfile.filename -%}
+								<small class="text-muted col-12">{{ soundfile.filename }}</small>
+							{%- endif -%}
+						</div>
+						<div class="card-footer">
+							<small class="text-muted modified-timestamp">{{ soundfile.modified_utc.isoformat(timespec='milliseconds') }}+0000</small>
+						</div>
+					</div>
+				</div>
+			{% endfor %}
+		</div>
+	</div>
+{%- endblock -%}
+{%- block body_script-%}
+	<script type="text/javascript">
+		var user_tz = moment.tz.guess();
+		var placeholderColor = window.getComputedStyle($("#{{ filter.prefix + filter.name.label.text }}")[0], "::placeholder").getPropertyValue("color");
+		var textColor = window.getComputedStyle($("#{{ filter.prefix + filter.name.label.text }}")[0]).getPropertyValue("color");
+		$(window).on('load', function() {
+			// Convert timestamps to local time
+			$('[class*="modified-timestamp"]').each(function() {
+				this.innerText = moment(this.innerText).tz(user_tz).fromNow() + moment(this.innerText).tz(user_tz).format(', HH:mm:ss, DD MMMM YYYY, dddd');
+			});
+			// Toggle text color for form-select controls (placeholder)
+			$('[class*="form-select"]').each(function() {
+				toggleColor(this);
+				$(this).on('change', function() {
+					toggleColor(this);
+				});
+			});
+		});
+		function toggleColor(selectElement) {
+			if (selectElement.options.selectedIndex == 0) {
+				$(selectElement).css('color', placeholderColor);
+			} else {
+				$(selectElement).css('color', textColor);
+			}
+		};
+	</script>
+{%- endblock -%}

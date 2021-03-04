@@ -1,0 +1,223 @@
+{%- extends "layout.html" -%}
+{%- set title = __('Headline') -%}
+{%- set prev_headline -%}<span class="oi oi-chevron-left"></span>{%- endset -%}
+{%- set next_headline -%}<span class="oi oi-chevron-right"></span>{%- endset -%}
+{%- if prev_headline_uid -%}
+	{%- set prev_headline_url = url_for('headline.update', uid=prev_headline_uid) -%}
+{%- else -%}
+	{%- set prev_headline_url = '' -%}
+{%- endif -%}
+{%- if next_headline_uid -%}
+	{%- set next_headline_url = url_for('headline.update', uid=next_headline_uid) -%}
+{%- else -%}
+	{%- set next_headline_url = '' -%}
+{%- endif -%}
+{%- set headline_submit -%}<label class="headlineFormSave" onmouseover="" style="cursor: pointer;" for="headlineSubmit" tabindex="0">{{ __('Save') }}</label>{%- endset -%}
+{%- set headline_submit_and_create -%}<label class="headlineFormSave" onmouseover="" style="cursor: pointer;" for="headlineSubmitAndCreate" tabindex="0">{{ __('Save') + ' ' }}<small class="badge bg-light text-dark" style="vertical-align: super;">{{ __('Create') }}</small></label>{%- endset -%}
+{%- set headline_submit_and_close -%}<label class="headlineFormSave" onmouseover="" style="cursor: pointer;" for="headlineSubmitAndClose" tabindex="0">{{ __('Save') + ' ' }}<small class="badge bg-light text-dark" style="vertical-align: super;">{{ __('Close') }}</small></label>{%- endset -%}
+{%- set additional_links = [(None, '#', headline_submit_and_create), (None, '#', headline_submit_and_close)] -%}
+{%- set form_links = [(None, prev_headline_url, prev_headline), (None, '#', headline_submit), (None, url_for('headline.get_catalog'),  __('Close')), (None, next_headline_url, next_headline)] -%}
+{%- set toolbox_links = [additional_links, form_links] -%}
+{%- block content -%}
+	<form id="headlineForm" class="col-12 offset-md-1 col-md-10 offset-lg-2 col-lg-8" method="post" actions="">
+		{{ form.csrf_token }}
+		<div class="row p-1 g-3">
+			<div class="col-12">
+				<small>{{ __('Title') }}</small>
+				<input autofocus type="text" class="form-control form-control-sm{%- for error in form.title.errors -%}{{ ' is-invalid' }}{%- endfor -%}" id="{{ form.title.label.text }}" name="{{ form.title.label.text }}" placeholder="{{ __('Title') }}" value="{{ form.title.data|default('', True) }}" />	
+				<div class="progress" style="height: 5px;">
+					<div id="{{ form.title.label.text }}Progress" class="progress-bar title-progress" role="progressbar" area-valuenow="0" area-valuemin="0" area-valuemax="100" style="background: darkgrey;"></div>
+				</div>
+				{%- for error in form.title.errors -%}
+					<div class="invalid-feedback">
+						{{ __(error) }}
+					</div>
+				{%- endfor -%}
+			</div>
+			<div class="col-12">
+				<small>{{ __('Description') }}</small>
+				<input type="text" class="form-control form-control-sm{%- for error in form.description.errors -%}{{ ' is-invalid' }}{%- endfor -%}" id="{{ form.description.label.text }}" name="{{ form.description.label.text }}" placeholder="{{ __('Description') }}" value="{{ form.description.data|default('', True) }}" />	
+				{%- for error in form.description.errors -%}
+					<div class="invalid-feedback">
+						{{ __(error) }}
+					</div>
+				{%- endfor -%}
+			</div>
+			<div class="col-12 col-sm-4">
+				<small>{{ __('Source') }}</small>
+				<input type="text" class="form-control form-control-sm{%- for error in form.source.errors -%}{{ ' is-invalid' }}{%- endfor -%}" id="{{ form.source.label.text }}" name="{{ form.source.label.text }}" placeholder="{{ __('Source') }}" value="{{ form.source.data|default('', True) }}" />	
+				{%- for error in form.source.errors -%}
+					<div class="invalid-feedback">
+						{{ __(error) }}
+					</div>
+				{%- endfor -%}
+			</div>
+			<div class="col-12 col-sm-2">
+				<small>{{ __('Language') }}</small>
+				<select class="form-select form-select-sm{%- for error in form.language.errors -%}{{ ' is-invalid' }}{%- endfor -%}" id="{{ form.language.label.text }}" name="{{ form.language.label.text }}">
+					{%- for choice in form.language.choices -%}
+						<option value="{{ choice[0] }}"{%- if form.language.data == choice[0] -%}{{ ' selected' }}{%- endif -%}>{{ __(choice[1]) }}</option>
+					{%- endfor -%}
+				</select>
+				{%- for error in form.language.errors -%}
+					<div class="invalid-feedback">
+						{{ __(error) }}
+					</div>
+				{%- endfor -%}
+			</div>
+			<div class="col-12 col-sm-4">
+				<small>{{ __('Destination') }}</small>
+				<select class="form-select form-select-sm{%- for error in form.destination.errors -%}{{ ' is-invalid' }}{%- endfor -%}" id="{{ form.destination.label.text }}" name="{{ form.destination.label.text }}">
+					{%- for choice in form.destination.choices -%}
+						<option value="{{ choice[0] }}"{%- if form.destination.data == choice[0] -%}{{ ' selected' }}{%- endif -%}>{{ __(choice[1]) }}</option>
+					{%- endfor -%}
+				</select>
+				{%- for error in form.destination.errors -%}
+					<div class="invalid-feedback">
+						{{ __(error) }}
+					</div>
+				{%- endfor -%}
+			</div>
+			<div class="col-12 col-sm-2">
+				<small>{{ __('Active') }}</small>
+				<select class="form-select form-select-sm{%- for error in form.active.errors -%}{{ ' is-invalid' }}{%- endfor -%}" id="{{ form.active.label.text }}" name="{{ form.active.label.text }}">
+					{%- for choice in form.active.choices -%}
+						<option value="{{ choice[0] }}"{%- if form.active.data == choice[0] -%}{{ ' selected' }}{%- endif -%}>{{ __(choice[1]) }}</option>
+					{%- endfor -%}
+				</select>
+				{%- for error in form.active.errors -%}
+					<div class="invalid-feedback">
+						{{ __(error) }}
+					</div>
+				{%- endfor -%}
+			</div>
+			<div class="col-12 col-sm-4 col-md-3">
+				<small>{{ __('Active After') }}</small>
+				<input type="text" class="form-control form-control-sm range-text{%- for error in form.active_after.errors -%}{{ ' is-invalid' }}{%- endfor -%}" id="{{ form.active_after.label.text }}" name="{{ form.active_after.label.text }}" placeholder="{{ __('Active After') }}" value="{{ form.active_after.data|default('', True) }}" />	
+				{%- for error in form.active_after.errors -%}
+					<div class="invalid-feedback">
+						{{ __(error) }}
+					</div>
+				{%- endfor -%}
+			</div>
+			<div class="col-12 col-sm-8 col-md-3">
+				<small class="d-none d-sm-inline" style="color: transparent;">_</small>
+				<input type="range" class="form-range mt-1" min="0" max="4320" step="1.0" value="0" id="{{ form.active_after.label.text }}Range">
+			</div>
+			<div class="col-12 col-sm-4 col-md-3">
+				<small>{{ __('Active Before') }}</small>
+				<input type="text" class="form-control form-control-sm range-text{%- for error in form.active_before.errors -%}{{ ' is-invalid' }}{%- endfor -%}" id="{{ form.active_before.label.text }}" name="{{ form.active_before.label.text }}" placeholder="{{ __('Active Before') }}" value="{{ form.active_before.data|default('', True) }}" />	
+				{%- for error in form.active_before.errors -%}
+					<div class="invalid-feedback">
+						{{ __(error) }}
+					</div>
+				{%- endfor -%}
+			</div>
+			<div class="col-12 col-sm-8 col-md-3">
+				<small class="d-none d-sm-inline" style="color: transparent;">_</small>
+				<input type="range" class="form-range mt-1" min="0" max="4320" step="1.0" value="1440" id="{{ form.active_before.label.text }}Range" name="{{ form.active_before.label.text }}Range">
+			</div>
+			<input type="submit" id="headlineSubmit" name="headlineSubmit" class="d-none" />
+			<input type="submit" id="headlineSubmitAndCreate" name="headlineSubmitAndCreate" class="d-none" />
+			<input type="submit" id="headlineSubmitAndClose" name="headlineSubmitAndClose" class="d-none" />
+			<input type="text" class="d-none" id="{{ form.timezone.label.text }}" name="{{ form.timezone.label.text }}" value="" />	
+		</div>
+	</form>
+	<canvas id="measureText"></canvas>
+{%- endblock -%}
+{%- block body_script-%}
+	<script type="text/javascript">
+		var placeholderColor = window.getComputedStyle($("#{{ form.title.label.text }}")[0], "::placeholder").getPropertyValue("color");
+		var textColor = window.getComputedStyle($("#{{ form.title.label.text }}")[0]).getPropertyValue("color");
+		var selActiveAfter = "#{{ form.active_after.label.text }}";
+		var selActiveBefore = "#{{ form.active_before.label.text }}";
+		var destinations = {{ __config('headline')['destination']|tojson|safe }};
+		var destinationFont = "";
+		var destinationWidth = 0;
+		var inputTitle = $("#{{ form.title.label.text }}");
+		var progressTitle = $("#{{ form.title.label.text }}Progress");
+		var measureTextCanvas = $("#measureText");
+		var measureTextContext = measureTextCanvas[0].getContext("2d");
+		measureTextCanvas.hide();
+		$(window).on('load', function() {
+			// Inititate user timezone in form
+			$("#{{ form.timezone.label.text }}").val(moment(Date.now()).format("ZZ"));
+			// Initital convert UTC timestamp to local timestamp
+			if ($(selActiveAfter).val() == "") {
+				momentAfter = moment(Date.now());
+				$(selActiveAfter).val(momentAfter.format("DD.MM.YYYY HH:mm:00"));
+			} else if ($(selActiveAfter).val().endsWith('+0000')) {
+				momentAfter = moment($(selActiveAfter).val(), "DD.MM.YYYY HH:mm:ssZZ");
+				$(selActiveAfter).val(momentAfter.format("DD.MM.YYYY HH:mm:00"));
+			}
+			if ($(selActiveBefore).val() == "") {
+				momentAfter = moment($(selActiveAfter).val(), "DD.MM.YYYY HH:mm:ss")
+				momentBefore = moment(momentAfter).add($(selActiveBefore+"Range").val(), 'm');
+				$(selActiveBefore).val(momentBefore.format("DD.MM.YYYY HH:mm:00"));
+			} else if ($(selActiveBefore).val().endsWith('+0000')) {
+				momentBefore = moment($(selActiveBefore).val(), "DD.MM.YYYY HH:mm:ssZZ");
+				$(selActiveBefore).val(momentBefore.format("DD.MM.YYYY HH:mm:00"));
+			}
+			// Events to update timestamp imputs with ranged values
+			$(selActiveAfter+"Range").on('input', function() {
+				momentAfter = moment(Date.now()).add(this.value, 'm');
+				$(selActiveAfter).val(momentAfter.format("DD.MM.YYYY HH:mm:00"));
+				momentBefore = moment(momentAfter.toDate()).add($(selActiveBefore+"Range").val(), 'm');
+				$(selActiveBefore).val(momentBefore.format("DD.MM.YYYY HH:mm:00"));
+			});
+			$(selActiveBefore+"Range").on('input', function() {
+				momentAfter = moment($(selActiveAfter).val(), "DD.MM.YYYY HH:mm:ss")
+				momentBefore = moment(momentAfter).add(this.value, 'm');
+				$(selActiveBefore).val(momentBefore.format("DD.MM.YYYY HH:mm:00"));
+			});
+			// Toggle text color for form-select controls (placeholder)
+			$('[class*="form-select"]').each(function() {
+				toggleColorAndWidth(this);
+				$(this).on('change', function() {
+					toggleColorAndWidth(this);
+				});
+			});
+			// Measure title text width to indicate destination overflow
+			indicateDestinationOverflow(inputTitle);
+			$(inputTitle).on('input', function() {
+				indicateDestinationOverflow($(this));
+			});
+		});
+		// Fade in save button on form change
+		$(function() {
+			$(".headlineFormSave").fadeTo(0, 0.25);
+			$("#headlineForm").change( function() {
+				$(".headlineFormSave").fadeTo(2000, 1);
+			});
+		});
+		function toggleColorAndWidth(selectElement) {
+			if (selectElement.options.selectedIndex == 0) {
+				$(selectElement).css('color', placeholderColor);
+				console.log(selectElement.options[0]);
+				if (selectElement.options[0].innerText == "{{ __('Destination') }}") {
+					destinationFont = "";
+					destinationWidth = 0;
+				}
+			} else {
+				$(selectElement).css('color', textColor);
+				if (selectElement.options[0].innerText == "{{ __('Destination') }}") {
+					destinationFont = destinations[selectElement.options.selectedIndex-1][2];
+					destinationWidth = destinations[selectElement.options.selectedIndex-1][3];
+				}
+			}
+			indicateDestinationOverflow(inputTitle);
+		};
+		function indicateDestinationOverflow(inputElement) {
+			measureTextContext.font = destinationFont;
+			textWidth = measureTextContext.measureText(inputElement.val()).width;
+			$(progressTitle).css("width", (textWidth / destinationWidth * 100).toString() + "%");
+			if (textWidth > destinationWidth && destinationWidth > 0) {
+				inputElement.css("color", "darkred");
+				$(progressTitle).css("background-color", "darkred");
+			} else {
+				inputElement.css("color", "");
+				$(progressTitle).css("background-color", "darkgrey");
+			}
+		};
+	</script>
+{%- endblock -%}

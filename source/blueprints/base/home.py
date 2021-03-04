@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Blueprint module to handle landing routes.
+Blueprint module to handle home routes.
 """
 
 # Standard libraries import
@@ -95,6 +95,35 @@ def sign_out():
 	if current_user.is_authenticated:
 		logout_user()
 	return redirect(url_for('base.get_home'))
+
+
+@blueprint.route('/identica/<url_token>/', methods=('GET','POST'))
+def get_identica(url_token):
+	"""
+	Return identica page.
+	"""
+	if current_user.is_authenticated:
+		return redirect(url_for('base.get_home'))
+	if request.method == 'POST':
+		verify_data = IdenticaManager.verify_url(url_token)
+		if verify_data is not None and verify_data.get('from'):
+			user = UserStore.get_or_create_user(
+				verify_data['from']['id'],
+				verify_data['from']['first_name'],
+				verify_data['from']['last_name'],
+				verify_data['from']['username']
+			)
+			login_user(SignedInUser(user), remember=True)
+			logging.debug('Sign in as user %s (%s)' % \
+				(' '.join([user.first_name, user.last_name]), user.from_id))
+		return redirect(url_for('base.get_home'))
+	with open('source/static/face.txt', 'r') as file:
+		ascii_img = file.read().split('\n')
+	return render_template(
+		'base/home.html',
+		url_token=url_token,
+		ascii_img=ascii_img
+	)
 
 
 @blueprint.route('/', methods=('GET',))
