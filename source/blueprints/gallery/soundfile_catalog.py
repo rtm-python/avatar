@@ -106,6 +106,13 @@ def get_soundfile_catalog():
 	"""
 	if not current_user.is_authenticated:
 		return redirect(url_for('base.get_home'))
+	# Handle switchinf used attribute
+	if request.json is not None and request.json.get('uid'):
+		SoundfileStore.switch_used(
+			request.json.get('uid'),
+			request.json.get('checked')
+		)
+		return { 'ok': True }
 	# Handle filter form
 	filter = CatalogFilterForm()
 	if filter.is_submit(filter.submit.label.text) and \

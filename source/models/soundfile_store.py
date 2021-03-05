@@ -72,6 +72,19 @@ class SoundfileStore(Store):
 		)
 
 	@staticmethod
+	def switch_used(uid: str, used: bool) -> Soundfile:
+		"""
+		Switch soundfile used attribute and return soundfile.
+		"""
+		soundfile = super(SoundfileStore, SoundfileStore).read(
+			Soundfile, uid
+		)
+		soundfile.used = used
+		return super(SoundfileStore, SoundfileStore).update(
+			soundfile
+		)
+
+	@staticmethod
 	def reorder(uid: str, order_utc: datetime) -> Soundfile:
 		"""
 		Update order_utc and return soundfile.

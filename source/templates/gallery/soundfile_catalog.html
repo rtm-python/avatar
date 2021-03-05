@@ -51,7 +51,7 @@
 			<hr class="m-0 mb-3 shadow-sm"/>
 		</header>
 		{%- if soundfile_list|length -%}
-			<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-2">
+			<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
 				{%- for soundfile in soundfile_list -%}
 					<div class="col">
 						<div class="soundfile-uid d-none" id="{{ soundfile.uid }}"></div>
@@ -60,7 +60,16 @@
 								<a href="{{ url_for('gallery.update_soundfile', uid=soundfile.uid) }}" class="stretched-link"></a>
 								<h5 class="d-flex w-100 justify-content-between m-0">
 									<div>{{ soundfile.name }}</div>
-									<a href="#collapseDelete{{ soundfile.uid }}" data-bs-toggle="collapse" style="position: relative; z-index: 100; font-size: 1rem; padding: 0.75rem; margin: -0.75rem; color: lightgrey;"><span class="oi oi-x"></span></a>
+									<div>
+										<div class="d-inline form-check form-switch m-0 p-0">
+											{%- if soundfile.used -%}
+												<input class="form-check-input used-switch" type="checkbox" uid="{{ soundfile.uid }}" style="position: relative; z-index: 100; height: 1rem; width: 2.5rem; cursor: pointer; background-color: darkseagreen; border: 1px solid grey;" checked>
+											{%- else -%}
+												<input class="form-check-input used-switch" type="checkbox" uid="{{ soundfile.uid }}" style="position: relative; z-index: 100; height: 1rem; width: 2.5rem; cursor: pointer; background-color: lightgrey; border: 1px solid grey;">
+											{%- endif -%}
+										</div>
+							    	<a class="d-inline-block" href="#collapseDelete{{ soundfile.uid }}" data-bs-toggle="collapse" style="position: relative; z-index: 100; font-size: 1rem; padding: 0.75rem; margin: -0.75rem; color: lightgrey;"><span class="oi oi-x"></span></a>
+									</div>
 								</h5>
 								<div class="collapse p-2 text-center" id="collapseDelete{{ soundfile.uid }}" style="background-color: rgb(250, 250, 250); position: relative; z-index: 100;">
 									<p class="mb-1"><small>{{ __('Do you really want to delete this soundfile from catalog?') }}</small></p>
@@ -88,7 +97,7 @@
 			{%- if pagination.page_index > 1 -%}
 				<a href="{{ pagination.url_for_prev()|default('#', True) }}" class="text-dark p-2"><span class="oi oi-chevron-left"></span></a>
 			{%- endif -%}
-			<small class="text-dark">{{__('%d page') % pagination.page_index }}</small><small class="text-muted">{{ __(' / %s Soundfiles Found...') % pagination.entity_count }}</small>
+			<small class="text-dark">{{__('Page %d/%d') % (pagination.page_index, pagination.page_count) }}</small><small class="text-muted">{{ __(' (%s Soundfiles Found...)') % pagination.entity_count }}</small>
 			{%- if pagination.page_index < pagination.page_count -%}
 				<a href="{{ pagination.url_for_next()|default('#', True) }}" class="text-dark p-2"><span class="oi oi-chevron-right"></span></a>
 			{%- endif -%}
@@ -115,6 +124,34 @@
 				toggleColor(this);
 				$(this).on('change', function() {
 					toggleColor(this);
+				});
+			});
+			// Toggle switch color and send post request to update used state
+			$('[class*="used-switch"]').each(function() {
+				$(this).on('change', function(event) {
+					var switchElement = $(this);
+					$.ajax({
+						type: "post",
+						async: false,
+						url: "",
+						data: JSON.stringify({
+							"uid": $(this).attr("uid"),
+							"checked": event.target.checked
+						}),
+						contentType: "application/json;charset=UTF-8",
+						success: function (data, textStatus, request) {
+							console.log(data);
+							if (data.ok) {
+								if (event.target.checked) {
+									$(switchElement).css("background-color", "darkseagreen");
+								} else {
+									$(switchElement).css("background-color", "lightgrey");
+								}
+							} else {
+								location.reload();
+							}
+						}
+					});
 				});
 			});
 		});
