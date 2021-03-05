@@ -10,6 +10,8 @@ from datetime import datetime
 # Application modules import
 from models import database
 from models import Store
+from models import save_file
+from models import delete_file
 from models.entity.soundfile import Soundfile
 
 # Additional libraries import
@@ -23,14 +25,14 @@ class SoundfileStore(Store):
 	"""
 
 	@staticmethod
-	def create(name: str, description: str, filename: str,
-						 order_utc: datetime, used: bool) -> Soundfile:
+	def create(name: str, description: str,
+						 file: object) -> Soundfile:
 		"""
 		Create and return soundfile.
 		"""
 		return super(SoundfileStore, SoundfileStore).create(
 			Soundfile(
-				name, description, filename, order_utc, used
+				name, description, save_file(file), datetime.utcnow(), False
 			)
 		)
 
@@ -44,16 +46,16 @@ class SoundfileStore(Store):
 		)
 
 	@staticmethod
-	def update(uid: str, name: str, description: str, filename: str,
-						 used: bool) -> Soundfile:
+	def update(uid: str, name: str, description: str,
+						 file: object) -> Soundfile:
 		"""
 		Update and return soundfile.
 		"""
 		soundfile = SoundfileStore.read(uid)
 		soundfile.name = name
 		soundfile.description = description
-		soundfile.filename = filename
-		soundfile.used = used
+		if file is not None:
+			soundfile.filename = save_file(file, soundfile.filename)
 		return super(SoundfileStore, SoundfileStore).update(
 			soundfile
 		)
@@ -63,8 +65,10 @@ class SoundfileStore(Store):
 		"""
 		Delete and return soundfile.
 		"""
+		soundfile = SoundfileStore.read(uid)
+		delete_file(soundfile.filename)
 		return super(SoundfileStore, SoundfileStore).delete(
-			SoundfileStore.read(uid)
+			soundfile
 		)
 
 	@staticmethod
@@ -82,27 +86,27 @@ class SoundfileStore(Store):
 
 	@staticmethod
 	def read_list(offset: int, limit: int,
-							  name: str, description: str, filename: str,
+							  name: str, description: str,
 								used: bool) -> list:
 		"""
 		Return list of soundfile by arguments.
 		"""
 		return _get_list_query(
-			name, description, filename, used
+			name, description, used
 		).limit(limit).offset(offset).all()
 
 	@staticmethod
-	def count_list(name: str, description: str, filename: str,
+	def count_list(name: str, description: str,
 								 used: bool) -> list:
 		"""
 		Return list of soundfile by arguments.
 		"""
 		return Store.count(_get_list_query(
-			name, description, filename, used
+			name, description, used
 		))
 
 
-def _get_list_query(name: str, description: str, filename: str,
+def _get_list_query(name: str, description: str,
 										used: bool):
 	"""
 	Return query object for soundfile based on arguments.
@@ -115,8 +119,6 @@ def _get_list_query(name: str, description: str, filename: str,
 			Soundfile.name.ilike('%' + name + '%'),
 		True if description is None else \
 			Soundfile.description.ilike('%' + description + '%'),
-		True if filename is None else \
-			Soundfile.filename.ilike('%' + filename + '%'),
 		True if used is None else \
 			Soundfile.used == used,
 		Soundfile.deleted_utc == None

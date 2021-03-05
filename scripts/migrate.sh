@@ -18,6 +18,11 @@ export FLASK_APP=source/run.py
 	&& echo '[+] Application database initiated' \
 	|| echo '[-] Folder "database" already exists'
 
+[ ! -d database/files ] \
+	&& mkdir database/files \
+	&& echo '[+] Folder "database/files" created' \
+	|| echo '[-] Folder "database/files" already exists'
+
 flask db migrate \
 	&& echo '[+] Application database migrated' \
 	&& flask db upgrade \

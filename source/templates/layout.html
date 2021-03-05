@@ -22,7 +22,8 @@
 	</head>
 	<body style="font-family: 'Russo One', sans-serif;">
 		<div class="container-fluid">
-			<header id="nav" class="w-100 p-2" style="position: fixed; bottom: 0; right: 0; left: 0; z-index: 1001;">
+			{%- block content -%}{%- endblock -%}
+			<footer class="w-100 p-2 ui-element" style="position: fixed; bottom: 0; right: 0; left: 0; z-index: 1001;">
 				<div class="card shadow-sm g-1 col-12 offset-md-1 col-md-10 offset-lg-2 col-lg-8" style="padding: 0.5rem; border-radius: 1.5rem;">
 					<div class="d-flex justify-content-between">
 						<a class="d-flex align-items-center" href="{{ url_for('avatar.get_player') }}">
@@ -54,16 +55,17 @@
 						</a>
 					</div>
 				</div>
-			</header>
-			{%- block content -%}{%- endblock -%}
+			</footer>
 		</div>
 		<script type="text/javascript">
 			$("#toggleOpacity").on("click", function() {
-				if ($("#nav").css("opacity") == 0) {
-					$("#nav").fadeTo(1000, 100);
-				} else {
-					$("#nav").fadeTo(1000, 0);
-				}
+				$('[class*="ui-element"]').each(function() {
+					if ($(this).css("opacity") == 0) {
+						$(this).fadeTo(1000, 100);
+					} else {
+						$(this).fadeTo(1000, 0);
+					}
+				});
 			});
 		</script>
     {%- block body_script -%}{%- endblock -%}

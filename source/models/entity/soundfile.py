@@ -36,4 +36,4 @@ class Soundfile(Entity):
 		self.description = description
 		self.filename = filename
 		self.order_utc = order_utc
-		self.active = active
+		self.used = used

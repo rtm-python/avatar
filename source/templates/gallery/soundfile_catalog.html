@@ -1,80 +1,104 @@
 {%- extends "layout.html" -%}
 {%- set title = __('Gallery (Soundfiles Catalog)') -%}
-{%- set toolbox_links = [create_links, reorder_links] -%}
-{%- if pagination.page_count > 1 -%}
-	{%- set col_md_size = 9 -%}
-{%- else -%}
-	{%- set col_md_size = 12 -%}
-{%- endif -%}
-{%- set pagination_toolbox -%}
-	<div class="row">
-		<form class="col-12 col-md-{{ col_md_size }} pt-2 pb-3" method="post" actions="">
-			{{ filter.csrf_token }}
-			<div class="row p-1 g-3">
-				<div class="col-12 col-sm-4">
-					<small>{{ __('Name') }}</small>
-					<input autofocus type="text" class="form-control form-control-sm" id="{{ filter.prefix + filter.name.label.text }}" name="{{ filter.prefix + filter.name.label.text }}" placeholder="{{ __('Name') }}" value="{{ filter.name.data|default('', True) }}" />	
-				</div>
-				<div class="col-12 col-sm-4">
-					<small>{{ __('Description') }}</small>
-					<input type="text" class="form-control form-control-sm" id="{{ filter.prefix + filter.description.label.text }}" name="{{ filter.prefix + filter.description.label.text }}" placeholder="{{ __('Description') }}" value="{{ filter.description.data|default('', True) }}" />
-				</div>
-				<div class="col-12 col-sm-4">
-					<small>{{ __('Filename') }}</small>
-					<input type="text" class="form-control form-control-sm" id="{{ filter.prefix + filter.filename.label.text }}" name="{{ filter.prefix + filter.filename.label.text }}" placeholder="{{ __('Filename') }}" value="{{ filter.filename.data|default('', True) }}" />	
-				</div>
-				<div class="col-12 col-sm-2">
-					<small>{{ __('Used') }}</small>
-					<select class="form-select form-select-sm" id="{{ filter.prefix + filter.used.label.text }}" name="{{ filter.prefix + filter.used.label.text }}">
-						{%- for choice in filter.used.choices -%}
-							<option value="{{ choice[0] }}"{%- if filter.used.data == choice[0] -%}{{ ' selected' }}{%- endif -%}>{{ __(choice[1]) }}</option>
-						{%- endfor -%}
-					</select>
-				</div>
-				<div class="col-12 col-sm-4">
-					<small class="d-block d-sm-none" style="color: transparent; margin: -10px;">_</small>
-					<div class="row g-3">
-						<div class="col-6">
-							<small class="d-none d-sm-inline" style="color: transparent;">_</small>
-							<input type="submit" class="w-100 btn btn-sm btn-block btn-outline-light" name="{{ filter.prefix + filter.submit.label.text }}" id="{{ filter.prefix + filter.submit.label.text }}" value="{{ __('Apply') }}" />
-						</div>
-						<div class="col-6">
-							<small class="d-none d-sm-inline" style="color: transparent;">_</small>
-							<a href="{{ url_for('gallery.get_soundfile_catalog', soundfileCatalogFilterReset='true') }}" class="w-100 btn btn-sm btn-block btn-outline-light">{{ __('Reset') }}</a>
-						</div>
-					</div>
-				</div>
-			</div>
-		</form>
-	</div>
-{%- endset -%}
 {%- block content -%}
 	<div class="col-12 offset-md-1 col-md-10 offset-lg-2 col-lg-8">
-		<div class="row row-cols-1 g-4" id="sortable">
-			{%- for soundfile in soundfile_list -%}
-				<div class="col">
-					<div class="soundfile-uid d-none" id="{{ soundfile.uid }}"></div>
-					<div class="card h-100">
-						<div class="card-body">
-							<a href="{{ url_for('gallery.update_soundfile', uid=soundfile.uid) }}" class="stretched-link"></a>
-							<h5 class="card-title">
-								<div class="col-12">{{ soundfile.name }}</div>
-							</h5>
-							{%- if soundfile.description -%}
-								<div class="col-12">{{ soundfile.description }}</div>
-							{%- endif -%}
-							{%- if soundfile.filename -%}
-								<small class="text-muted col-12">{{ soundfile.filename }}</small>
-							{%- endif -%}
+		<header class="mt-3 sticky-top bg-white">
+			<div class="d-flex w-100 justify-content-between align-items-center">
+				<div>
+					<h1 class="d-inline-block m-0">{{ __('Gallery') }}</h1>
+					<small class="d-none d-sm-inline-block text-secondary" style="margin-left: 10px;">{{ __('Soundfiles Catalog') }}</small>
+				</div>
+				<div>
+					<a href="{{ url_for('gallery.upload_soundfile') }}" class="btn btn-sm btn-outline-dark" style="border: none;">{{ __('Upload') }}</a>
+					<a href="#collapseFilter" data-bs-toggle="collapse" class="btn btn-sm btn-outline-dark" style="border: none;">{{ __('Filter') }}</a>
+				</div>
+			</div>
+			<div class="collapse p-2" id="collapseFilter" style="background-color: rgb(250, 250, 250);">
+				<div class="row">
+					<form class="col-12 pt-2 pb-3" method="post" actions="">
+						{{ filter.csrf_token }}
+						<div class="row p-1 g-3">
+							<div class="col-12 col-sm-5 form-floating">
+								<input autofocus type="text" class="form-control form-control-sm" id="{{ filter.prefix + filter.name.label.text }}" name="{{ filter.prefix + filter.name.label.text }}" placeholder="{{ __('Name') }}" value="{{ filter.name.data|default('', True) }}" />	
+								<label style="color: lightgrey; font-size: 0.9rem;" for="{{ filter.name.label.text }}">{{ __('Name') }}</label>
+							</div>
+							<div class="col-12 col-sm-5 form-floating">
+								<input type="text" class="form-control form-control-sm" id="{{ filter.prefix + filter.description.label.text }}" name="{{ filter.prefix + filter.description.label.text }}" placeholder="{{ __('Description') }}" value="{{ filter.description.data|default('', True) }}" />
+								<label style="color: lightgrey; font-size: 0.9rem;" for="{{ filter.description.label.text }}">{{ __('Description') }}</label>
+							</div>
+							<div class="col-12 col-sm-2 form-floating">
+								<select class="form-select form-select-sm" id="{{ filter.prefix + filter.used.label.text }}" name="{{ filter.prefix + filter.used.label.text }}">
+									{%- for choice in filter.used.choices -%}
+										<option value="{{ choice[0] }}"{%- if filter.used.data == choice[0] -%}{{ ' selected' }}{%- endif -%}>{{ __(choice[1]) }}</option>
+									{%- endfor -%}
+								</select>
+								<label style="color: lightgrey; font-size: 0.9rem;" for="{{ filter.used.label.text }}">{{ __('Used') }}</label>
+							</div>
+							<div class="col-12 offset-sm-3 col-sm-6">
+								<div class="row g-3">
+									<div class="col-6">
+										<input type="submit" class="w-100 btn btn-sm btn-block btn-outline-dark" name="{{ filter.prefix + filter.submit.label.text }}" id="{{ filter.prefix + filter.submit.label.text }}" value="{{ __('Apply') }}" />
+									</div>
+									<div class="col-6">
+										<a href="{{ url_for('gallery.get_soundfile_catalog', soundfileCatalogFilterReset='true') }}" class="w-100 btn btn-sm btn-block btn-outline-dark">{{ __('Reset') }}</a>
+									</div>
+								</div>
+							</div>
 						</div>
-						<div class="card-footer">
-							<small class="text-muted modified-timestamp">{{ soundfile.modified_utc.isoformat(timespec='milliseconds') }}+0000</small>
+					</form>
+				</div>
+			</div>
+			<hr class="m-0 mb-3 shadow-sm"/>
+		</header>
+		{%- if soundfile_list|length -%}
+			<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-2">
+				{%- for soundfile in soundfile_list -%}
+					<div class="col">
+						<div class="soundfile-uid d-none" id="{{ soundfile.uid }}"></div>
+						<div class="card h-100">
+							<div class="card-body pb-1">
+								<a href="{{ url_for('gallery.update_soundfile', uid=soundfile.uid) }}" class="stretched-link"></a>
+								<h5 class="d-flex w-100 justify-content-between m-0">
+									<div>{{ soundfile.name }}</div>
+									<a href="#collapseDelete{{ soundfile.uid }}" data-bs-toggle="collapse" style="position: relative; z-index: 100; font-size: 1rem; padding: 0.75rem; margin: -0.75rem; color: lightgrey;"><span class="oi oi-x"></span></a>
+								</h5>
+								<div class="collapse p-2 text-center" id="collapseDelete{{ soundfile.uid }}" style="background-color: rgb(250, 250, 250); position: relative; z-index: 100;">
+									<p class="mb-1"><small>{{ __('Do you really want to delete this soundfile from catalog?') }}</small></p>
+									<a class="btn btn-sm btn-outline-dark" href="{{ url_for('gallery.delete_soundfile', uid=soundfile.uid) }}">{{ __('Delete') }}</a>
+								</div>
+								{%- if soundfile.description -%}
+									<small class="col-12 text-muted">{{ soundfile.description }}</small>
+								{%- endif -%}
+							</div>
+							<div class="m-1 d-flex align-items-center" style="border-radius: 1rem; overflow: hidden; height: 1.5rem;">
+								<audio controls class="col-12" style="z-index: 100; position: relative;">
+									<source src="{{ url_for('gallery.get_audio', filename=soundfile.filename) }}" type="audio/mpeg">
+									{{ __('Audio not supported') }}
+								</audio> 
+							</div>
+							<div class="card-footer" style="font-size: 0.75rem;">
+								<small class="text-muted modified-timestamp">{{ soundfile.modified_utc.isoformat(timespec='milliseconds') }}+0000</small>
+							</div>
 						</div>
 					</div>
-				</div>
-			{% endfor %}
+				{% endfor %}
+			</div>
 		</div>
-	</div>
+		<div class="col-12 text-center mt-2">
+			{%- if pagination.page_index > 1 -%}
+				<a href="{{ pagination.url_for_prev()|default('#', True) }}" class="text-dark p-2"><span class="oi oi-chevron-left"></span></a>
+			{%- endif -%}
+			<small class="text-dark">{{__('%d page') % pagination.page_index }}</small><small class="text-muted">{{ __(' / %s Soundfiles Found...') % pagination.entity_count }}</small>
+			{%- if pagination.page_index < pagination.page_count -%}
+				<a href="{{ pagination.url_for_next()|default('#', True) }}" class="text-dark p-2"><span class="oi oi-chevron-right"></span></a>
+			{%- endif -%}
+		</div>
+		<div class="col-12" style="height: 4rem;"></div>
+	{%- else -%}
+		<div class="d-flex align-items-center row text-center" style="height: calc(100vh - 5rem - 3rem);">
+			<small class="text-muted">{{ __('Soundfiles Not Found...') }}</small>
+		</div>
+	{%- endif -%}
 {%- endblock -%}
 {%- block body_script-%}
 	<script type="text/javascript">

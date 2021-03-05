@@ -6,10 +6,12 @@ Initial module to initiate database models and migrations.
 
 # Standard libraries import
 import os
+import uuid
 
 # Additional libraries import
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask import send_from_directory
 
 # Application modules import
 from config import CONFIG
@@ -22,17 +24,54 @@ from sqlalchemy import func
 # Initiate database
 database_folder = os.path.join(os.path.abspath(os.curdir), 'database')
 if CONFIG['database']['filename'] is None:
-	application.config['SQLALCHEMY_DATABASE_URI'] = CONFIG['database']['URI']
+	application.config['SQLALCHEMY_DATABASE_URI'] = \
+		CONFIG['database']['URI']
 else:
-	application.config['SQLALCHEMY_DATABASE_URI'] = CONFIG['database']['URI'] + 		os.path.join(database_folder, CONFIG['database']['filename'])
+	application.config['SQLALCHEMY_DATABASE_URI'] = \
+		CONFIG['database']['URI'] + \
+		os.path.join(database_folder, CONFIG['database']['filename'])
 application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 database = SQLAlchemy(application)
 migrate = Migrate(application, database, directory=database_folder)
+
+# Initiate file storage
+files_folder = os.path.join(os.path.abspath(os.curdir), 'database', 'files')
+
+
+def save_file(file: object, previous: str = None) -> str:
+	"""
+	Generate secure filename, store file and return secure filename.
+	"""
+	file_uid = str(uuid.uuid4())
+	filename = '#%s#%s' % (file_uid, file.filename)
+	file.save(os.path.join(files_folder, file_uid))
+	if previous is not None:
+		delete_file(previous)
+	return filename
+
+
+def delete_file(filename: str) -> None:
+	"""
+	Delete file.
+	"""
+	_, file_uid, _ = filename.split('#')
+	os.remove(os.path.join(files_folder, file_uid))
+
+
+def send_file(filename: str) -> object:
+	"""
+	Return file to response for request.
+	"""
+	_, file_uid, attachment_filename = filename.split('#')
+	return send_from_directory(
+		files_folder, file_uid, attachment_filename=attachment_filename)
+
 
 # Entity modules import (prevent circular import)
 # from models.entity import <entity_module>
 from models.entity import Entity
 from models.entity import user
+from models.entity import soundfile
 
 
 class Store():
@@ -94,3 +133,4 @@ class Store():
 
 
 from models.user_store import UserStore
+from models.soundfile_store import SoundfileStore

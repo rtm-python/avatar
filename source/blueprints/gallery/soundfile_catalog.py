@@ -17,6 +17,7 @@ from blueprints.__list__ import FilterForm
 from blueprints.__list__ import PaginatorForm
 from models.soundfile_store import SoundfileStore
 from models.entity.soundfile import Soundfile
+from models import send_file
 from config import CONFIG
 
 # Additional libraries import
@@ -38,7 +39,6 @@ class CatalogFilterForm(FilterForm):
 	"""
 	name = StringField('FilterName')
 	description = StringField('FilterDescription')
-	filename = StringField('FilterFilename')
 	used = SelectField('FilterUsed')
 	submit = SubmitField('FilterSubmit')
 
@@ -58,7 +58,6 @@ class SoundfileForm(FlaskForm):
 	name = StringField('soundfileName')
 	description = StringField('soundfileDescription')
 	filename = StringField('soundfileFilename')
-	used = SelectField('soundfileUsed')
 	submit = SubmitField('soundfileSubmit')
 
 	def __init__(self, soundfile: Soundfile = None) -> "SoundfileForm":
@@ -66,13 +65,10 @@ class SoundfileForm(FlaskForm):
 		Initiate object with values from request.
 		"""
 		super(SoundfileForm, self).__init__()
-		self.used.choices = \
-			[('', 'Used')] + [('yes', 'Yes'), ('no', 'No')]
 		if soundfile:
 			self.name.data = soundfile.name
 			self.description.data = soundfile.description
 			self.filename.data = soundfile.filename
-			self.used.data = 'yes' if soundfile.used else 'no'
 		else:
 			for field in self:
 				if field.name != 'csrf_token':
@@ -92,9 +88,6 @@ class SoundfileForm(FlaskForm):
 		if self.name.data is None or len(self.name.data) == 0:
 			self.name.errors = ['Value required.']
 			is_valid = False
-		if self.used.data is None:
-			self.used.errors = ['Invalid value.']
-			is_valid = False
 		return is_valid
 
 	def is_submit(self, submit_name: str) -> bool:
@@ -111,27 +104,30 @@ def get_soundfile_catalog():
 	"""
 	Return soundfile catalog page.
 	"""
+	if not current_user.is_authenticated:
+		return redirect(url_for('base.get_home'))
 	# Handle filter form
 	filter = CatalogFilterForm()
 	if filter.is_submit(filter.submit.label.text) and \
 			filter.validate_on_submit():
 		filter.store_fields()
-		return redirect(filter.url_for_with_fields('soundfile.get_catalog'))
+		return redirect(filter.url_for_with_fields(
+			'gallery.get_soundfile_catalog'))
 	filter.define_fields()
 	# Handle paginator form
 	paginator = PaginatorForm('soundfileCatalog')
 	if paginator.is_submit(paginator.submit.label.text) and \
 			paginator.validate_on_submit():
 		paginator.store_fields()
-		return redirect(paginator.url_for_with_fields('soundfile.get_catalog'))
+		return redirect(paginator.url_for_with_fields(
+			'gallery.get_soundfile_catalog'))
 	paginator.define_fields()
 	# Prepare list data
 	pagination = Pagination(
-		'soundfileCatalog', 'soundfile.get_catalog',
+		'soundfileCatalog', 'gallery.get_soundfile_catalog',
 		SoundfileStore.count_list(
 			filter.name.data,
 			filter.description.data,
-			filter.filename.data,
 			None \
 				if filter.used.data == 'used' else filter.used.data == 'yes'
 		)
@@ -141,7 +137,6 @@ def get_soundfile_catalog():
 		pagination.per_page,
 		filter.name.data,
 		filter.description.data,
-		filter.filename.data,
 		None \
 			if filter.used.data == 'used' else filter.used.data == 'yes'
 	)
@@ -154,19 +149,27 @@ def get_soundfile_catalog():
 	)
 
 
-@blueprint.route('/soundfile/catalog/create/', methods=('GET', 'POST'))
-def create_soundfile():
+@blueprint.route('/soundfile/catalog/upload/', methods=('GET', 'POST'))
+def upload_soundfile():
 	"""
-	Return soundfile create page.
+	Return soundfile upload page.
 	"""
+	if not current_user.is_authenticated:
+		return redirect(url_for('base.get_home'))
 	form = SoundfileForm()
 	if form.validate_on_submit():
-		used = True if form.used.data == 'yes' else False
-		soundfile = SoundfileStore.create(
-			form.name.data, form.description.data, form.filename.data,
-			datetime.utcnow(), used
-		)
-		return redirect(url_for('gallery.get_soundfile_catalog'))
+		if form.filename.data is None:
+			form.filename.errors = ['Value required.']
+		else:
+			file = request.files.get('%sFile' % form.filename.label.text)
+			if file is None or file.filename == '' or \
+					file.content_type not in CONFIG['database']['allowed_types']:
+				form.filename.errors = ['Invalid value.']
+			else:
+				soundfile = SoundfileStore.create(
+					form.name.data, form.description.data, file
+				)
+				return redirect(url_for('gallery.get_soundfile_catalog'))
 	return render_template(
 		'gallery/soundfile.html',
 		form=form
@@ -178,19 +181,50 @@ def update_soundfile(uid: str):
 	"""
 	Return soundfile update page.
 	"""
+	if not current_user.is_authenticated:
+		return redirect(url_for('base.get_home'))
 	# Handle soundfile form
 	form = SoundfileForm(
-		SoundfileStore.read(uid) \
-			if request.method == 'GET' else None
+	SoundfileStore.read(uid) \
+		if request.method == 'GET' else None
 	)
 	if form.validate_on_submit():
-		used = True if form.used.data == 'yes' else False
-		SoundfileStore.update(
-			uid, form.name.data, form.description.data, form.filename.data,
-			used
-		)
-		return redirect(url_for('galery.update_soundfile', uid=uid))
+		if form.filename.data is None:
+			form.filename.errors = ['Value required.']
+		else:
+			file = request.files.get('%sFile' % form.filename.label.text)
+			if (file is None or file.filename == '' or \
+					file.content_type not in CONFIG['database']['allowed_types']
+					) and not form.filename.data.startswith('#'):
+				form.filename.errors = ['Invalid value.']
+			SoundfileStore.update(
+				uid, form.name.data, form.description.data, file
+			)
+			return redirect(url_for('gallery.get_soundfile_catalog'))
 	return render_template(
 		'gallery/soundfile.html',
 		form=form
 	)
+
+
+@blueprint.route('/soundfile/catalog/delete/<uid>/', methods=('GET',))
+def delete_soundfile(uid: str):
+	"""
+	Delete soundfile and return redirect page.
+	"""
+	if not current_user.is_authenticated:
+		return redirect(url_for('base.get_home'))
+	SoundfileStore.delete(
+		uid
+	)
+	return redirect(url_for('gallery.get_soundfile_catalog'))
+
+
+@blueprint.route('/soundfile/catalog/audio/<filename>/', methods=('GET',))
+def get_audio(filename: str):
+	"""
+	Return audio file.
+	"""
+	if not current_user.is_authenticated:
+		abort(403)
+	return send_file(filename)

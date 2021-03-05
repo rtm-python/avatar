@@ -32,6 +32,7 @@ application = Flask(
 	static_folder=STATIC_PATH, template_folder=TEMPLATE_PATH
 )
 application.config['SECRET_KEY'] = CONFIG['web']['secret_key']
+application.config['MAX_CONTENT_LENGTH'] = CONFIG['web']['max_content_length']
 
 
 class SignedInUser(UserMixin):

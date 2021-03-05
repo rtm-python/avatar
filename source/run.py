@@ -27,4 +27,7 @@ def run_identica():
 
 # Run application on executing module
 if __name__ == '__main__':
-	application.run(CONFIG['web']['host'], CONFIG['web']['port'])
+	application.run(
+		CONFIG['web']['host'], CONFIG['web']['port'],
+		threaded=True
+	)
