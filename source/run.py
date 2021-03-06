@@ -12,10 +12,13 @@ import sys
 sys.path.append('source')
 
 # Application moudles import
-from blueprints import application
+import blueprints
 from models import database
-from config import CONFIG
 from identica import IdenticaManager
+
+application = blueprints.application
+socketio = blueprints.socketio
+
 
 @application.cli.command('run-identica')
 def run_identica():
@@ -25,9 +28,15 @@ def run_identica():
 	IdenticaManager(debug_mode=True).run()
 
 
+@application.cli.command('run-socketio')
+def run_socketio():
+	"""
+	Run SocketIO server.
+	"""
+	socketio.run(application)
+
+
 # Run application on executing module
 if __name__ == '__main__':
-	application.run(
-		CONFIG['web']['host'], CONFIG['web']['port'],
-		threaded=True
-	)
+#	application.run(threaded=True)
+	socketio.run(application)

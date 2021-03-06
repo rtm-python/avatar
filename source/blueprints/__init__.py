@@ -25,6 +25,7 @@ from flask_paranoid import Paranoid
 from flask_login import LoginManager
 from flask_login import UserMixin
 from flask_login import AnonymousUserMixin
+from flask_socketio import SocketIO
 
 # Initiate Flask object
 application = Flask(
@@ -33,6 +34,11 @@ application = Flask(
 )
 application.config['SECRET_KEY'] = CONFIG['web']['secret_key']
 application.config['MAX_CONTENT_LENGTH'] = CONFIG['web']['max_content_length']
+application.config['SERVER_NAME'] = \
+	'%s:%d' % (CONFIG['web']['host'], CONFIG['web']['port'])
+
+# Create SocketIO object
+socketio = SocketIO()
 
 
 class SignedInUser(UserMixin):
@@ -94,6 +100,9 @@ for module_name, url_prefix in BLUEPRINTS_NAME_WITH_URL_PREFIX:
 # Initiate Paranoid object
 paranoid = Paranoid(application)
 paranoid.redirect_view = BLUEPRINTS_ROOT_HANDLER
+
+# Initiate SocketIO object
+socketio.init_app(application)
 
 # Import UserStore from models
 from models import UserStore

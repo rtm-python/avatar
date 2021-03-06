@@ -10,6 +10,7 @@
 				</div>
 				<div>
 					<a href="{{ url_for('gallery.upload_soundfile') }}" class="btn btn-sm btn-outline-dark" style="border: none;">{{ __('Upload') }}</a>
+					<a href="{{ url_for('gallery.refresh_soundfile_catalog') }}" class="btn btn-sm btn-outline-dark" style="border: none;">{{ __('Refresh') }}</a>
 					<a href="#collapseFilter" data-bs-toggle="collapse" class="btn btn-sm btn-outline-dark" style="border: none;">{{ __('Filter') }}</a>
 				</div>
 			</div>
@@ -51,7 +52,7 @@
 			<hr class="m-0 mb-3 shadow-sm"/>
 		</header>
 		{%- if soundfile_list|length -%}
-			<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+			<div class="row row-cols-1 row-cols-md-2 g-3">
 				{%- for soundfile in soundfile_list -%}
 					<div class="col">
 						<div class="soundfile-uid d-none" id="{{ soundfile.uid }}"></div>

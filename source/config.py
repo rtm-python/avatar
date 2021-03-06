@@ -64,6 +64,7 @@ def define_list(folder: str, extension: str) -> list:
 BLUEPRINTS_NAME_WITH_URL_PREFIX = [
 	('base', '/'),
 	('avatar', '/avatar/'),
+	('playlist', '/playlist/'),
 	('gallery', '/gallery/')
 ]
 BLUEPRINTS_ROOT_HANDLER = 'base.get_home'

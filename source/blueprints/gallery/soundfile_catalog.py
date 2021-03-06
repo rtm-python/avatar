@@ -106,7 +106,7 @@ def get_soundfile_catalog():
 	"""
 	if not current_user.is_authenticated:
 		return redirect(url_for('base.get_home'))
-	# Handle switchinf used attribute
+	# Handle switching used attribute
 	if request.json is not None and request.json.get('uid'):
 		SoundfileStore.switch_used(
 			request.json.get('uid'),
@@ -212,6 +212,17 @@ def update_soundfile(uid: str):
 		'gallery/soundfile.html',
 		form=form
 	)
+
+
+@blueprint.route('/soundfile/catalog/refresh/', methods=('GET',))
+def refresh_soundfile_catalog():
+	"""
+	Refresh soundfile catalog (uncheck used) and return redirect.
+	"""
+	if not current_user.is_authenticated:
+		return redirect(url_for('base.get_home'))
+	SoundfileStore.refresh()
+	return redirect(url_for('gallery.get_soundfile_catalog'))
 
 
 @blueprint.route('/soundfile/catalog/delete/<uid>/', methods=('GET',))

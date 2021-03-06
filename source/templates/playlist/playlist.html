@@ -1,0 +1,141 @@
+{%- extends "layout.html" -%}
+{%- set title = __('Playlist') -%}
+{%- block style -%}
+  <style>
+		.content-sortable-highlight {
+			height: 5rem;
+			background-color: rgba(125, 125, 125, 0.50);
+			border: 1px solid rgba(100, 100, 100, 0.50);
+			border-radius: 0.25rem;
+		}
+  </style>
+{%- endblock -%}
+{%- block content -%}
+	<div class="col-12 offset-md-1 col-md-10 offset-lg-2 col-lg-8">
+		<header class="mt-3 sticky-top bg-white">
+			<div class="d-flex w-100 justify-content-between align-items-center">
+				<div>
+					<h1 class="d-inline-block m-0">{{ __('Playlist') }}</h1>
+				</div>
+				<div>
+					<a href="javascript:reorderSoundfiles();" class="btn btn-sm btn-outline-dark" style="border: none; opacity: 1;">{{ __('Reorder') }}</a>
+					<a href="#" class="btn btn-sm btn-outline-dark" style="border: none;">{{ __('Render') }}</a>
+				</div>
+			</div>
+			<hr class="m-0 mb-3 shadow-sm"/>
+		</header>
+		{%- if soundfile_list|length -%}
+			<div class="row row-cols-1 g-3" id="sortable">
+				{%- for soundfile in soundfile_list -%}
+					<div class="col">
+						<div class="soundfile-uid d-none" id="{{ soundfile.uid }}"></div>
+						<div class="card h-100">
+							<div class="row g-0">
+								<div class="col-12 col-md-4" style="background-color: lightgrey;">
+									<div style="width: 100%; padding-top: 56.25%; position: relative;">
+										<div class="text-center" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;">
+											<img src="http://i.stack.imgur.com/SBv4T.gif" alt="{{ __('Render not found') }}" style="max-width: 100%; max-height: 100%; height: 100%;">
+										</div>
+									</div>
+								</div>
+								<div class="col-12 col-md-8">
+									<div class="h-100 d-flex flex-column">
+										<div class="w-100 card-body pb-1 mb-auto">
+											<a href="{{ url_for('gallery.update_soundfile', uid=soundfile.uid) }}" class="stretched-link"></a>
+											<h5 class="d-flex w-100 justify-content-between m-0">
+												<div>{{ soundfile.name }}</div>
+											</h5>
+											{%- if soundfile.description -%}
+												<small class="col-12 text-muted">{{ soundfile.description }}</small>
+											{%- endif -%}
+										</div>
+										<div class="m-1 d-flex align-items-center" style="border-radius: 1rem; overflow: hidden; height: 1.5rem;">
+											<audio controls class="col-12" style="z-index: 100; position: relative;">
+												<source src="{{ url_for('gallery.get_audio', filename=soundfile.filename) }}" type="audio/mpeg">
+												{{ __('Audio not supported') }}
+											</audio> 
+										</div>
+										<div class="w-100 card-footer" style="font-size: 0.75rem;">
+											<small class="text-muted modified-timestamp">{{ soundfile.modified_utc.isoformat(timespec='milliseconds') }}+0000</small>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				{% endfor %}
+			</div>
+		</div>
+		<div class="col-12 text-center mt-2">
+			<small class="text-muted">{{ __('%s Soundfiles Found...') % soundfile_list|length }}</small>
+		</div>
+		<div class="col-12" style="height: 4rem;"></div>
+	{%- else -%}
+		<div class="d-flex align-items-center row text-center" style="height: calc(100vh - 5rem - 3rem);">
+			<small class="text-muted">{{ __('Soundfiles Not Found...') }}</small>
+		</div>
+	{%- endif -%}
+	<div id="locker" style="position: fixed; top: 0; left: 0; bottom: 0; right: 0; background-color: rgba(75, 75, 75, 0.50); z-index: 2000;"></div>
+{%- endblock -%}
+{%- block body_script-%}
+	<script type="text/javascript">
+		var user_tz = moment.tz.guess();
+		$(window).on('load', function() {
+			// Convert timestamps to local time
+			$('[class*="modified-timestamp"]').each(function() {
+				this.innerText = moment(this.innerText).tz(user_tz).fromNow() + moment(this.innerText).tz(user_tz).format(', HH:mm:ss, DD MMMM YYYY, dddd');
+			});
+		});
+		// Sortable headlines (jquery-ui)
+		$(function() {
+			if ($(window).width() >= 1024) {
+				$("#sortable").sortable({
+					placeholder: "content-sortable-highlight"
+				});
+				$("#sortable").on("sortchange", function() {
+					$('[href="javascript:reorderSoundfiles();"]').fadeTo(2000, 1);
+				});
+			{%- if not mobile -%}
+				} else {
+					window.location.href = "{{ url_for('playlist.get_playlist', mobile=True) }}"
+				}
+			{%- else -%}
+				}
+			{%- endif -%}
+			$('[href="javascript:reorderSoundfiles();"]').fadeTo(0, 0.25);
+			$("#locker").fadeTo(0, 0.25);
+			$("#locker").hide();
+			$("#sortable").disableSelection();
+		});
+		function reorderSoundfiles() {
+			if ($('[href="javascript:reorderSoundfiles();"]').css("opacity") == 1) {
+				$("#locker").show();
+				$("#locker").fadeTo(1000, 1);
+				var reorderedList = [];
+				$('[class*="soundfile-uid"]').each(function() {
+					reorderedList.push($(this).attr("id"));
+				});
+				$.ajax({
+					type: "post",
+					async: false,
+					url: "",
+					data: JSON.stringify({"reorderedList":reorderedList}, null),
+			    contentType: "application/json;charset=UTF-8",
+					success: function (data, textStatus, request) {
+						if (data.redirect) {
+							window.location.href = data.redirect;
+						} else {
+							location.reload();
+						}
+					}
+				});
+			}
+		};
+	</script>
+{%- endblock -%}
+{%- block script -%}
+	{%- if not mobile -%}
+		<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+	{%- endif -%}
+{%- endblock -%}
+

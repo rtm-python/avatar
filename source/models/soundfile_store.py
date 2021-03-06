@@ -85,6 +85,17 @@ class SoundfileStore(Store):
 		)
 
 	@staticmethod
+	def refresh() -> None:
+		"""
+		Refresh soundfiles (uncheck used).
+		"""
+		for soundfile in SoundfileStore.read_list(
+				0, None, None, None, True):
+			soundfile.used = False
+			soundfile.set_modified()
+		database.session.commit()
+
+	@staticmethod
 	def reorder(uid: str, order_utc: datetime) -> Soundfile:
 		"""
 		Update order_utc and return soundfile.
@@ -124,7 +135,6 @@ def _get_list_query(name: str, description: str,
 	"""
 	Return query object for soundfile based on arguments.
 	"""
-	utcnow = datetime.utcnow()
 	return database.session.query(
 		Soundfile
 	).filter(
