@@ -38,7 +38,7 @@ migrate = Migrate(application, database, directory=database_folder)
 files_folder = os.path.join(os.path.abspath(os.curdir), 'database', 'files')
 
 
-def save_file(file: object, previous: str = None) -> str:
+def save_file(file: object, previous: str = None) -> (str, str):
 	"""
 	Generate secure filename, store file and return secure filename.
 	"""

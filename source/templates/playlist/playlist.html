@@ -19,7 +19,7 @@
 				</div>
 				<div>
 					<a href="javascript:reorderSoundfiles();" class="btn btn-sm btn-outline-dark" style="border: none; opacity: 1;">{{ __('Reorder') }}</a>
-					<a href="#" class="btn btn-sm btn-outline-dark" style="border: none;">{{ __('Render') }}</a>
+					<a href="javascript:renderSoundfiles();" class="btn btn-sm btn-outline-dark" style="border: none;">{{ __('Render') }}</a>
 				</div>
 			</div>
 			<hr class="m-0 mb-3 shadow-sm"/>
@@ -33,15 +33,15 @@
 							<div class="row g-0">
 								<div class="col-12 col-md-4" style="background-color: lightgrey;">
 									<div style="width: 100%; padding-top: 56.25%; position: relative;">
-										<div class="text-center" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;">
-											<img src="http://i.stack.imgur.com/SBv4T.gif" alt="{{ __('Render not found') }}" style="max-width: 100%; max-height: 100%; height: 100%;">
+										<div class="text-center text-muted" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; font-size: 0.75rem;">
+											<img src="{{ url_for('playlist.get_image', filename='video-to-gif-sample.gif') }}" alt="{{ __('Render not found') }}" style="max-width: 100%; max-height: 100%; height: 100%;">
 										</div>
 									</div>
 								</div>
 								<div class="col-12 col-md-8">
 									<div class="h-100 d-flex flex-column">
 										<div class="w-100 card-body pb-1 mb-auto">
-											<a href="{{ url_for('gallery.update_soundfile', uid=soundfile.uid) }}" class="stretched-link"></a>
+											<a href="javascript:playSoundfile('{{ soundfile.uid }}');" class="stretched-link"></a>
 											<h5 class="d-flex w-100 justify-content-between m-0">
 												<div>{{ soundfile.name }}</div>
 											</h5>
@@ -130,7 +130,47 @@
 					}
 				});
 			}
-		};
+		}
+		function renderSoundfiles() {
+			$("#locker").show();
+			$("#locker").fadeTo(1000, 1);
+			var uidList = [];
+			$('[class*="soundfile-uid"]').each(function() {
+				uidList.push($(this).attr("id"));
+			});
+			$.ajax({
+				type: "post",
+				async: false,
+				url: "",
+				data: JSON.stringify({"uidList":uidList}, null),
+		    contentType: "application/json;charset=UTF-8",
+				success: function (data, textStatus, request) {
+					if (data.redirect) {
+						window.location.href = data.redirect;
+					} else {
+						location.reload();
+					}
+				}
+			});
+		}
+		function playSoundfile(uid) {
+			$("#locker").show();
+			$("#locker").fadeTo(1000, 1);
+			$.ajax({
+				type: "post",
+				async: false,
+				url: "",
+				data: JSON.stringify({"uidPlay":uid}, null),
+		    contentType: "application/json;charset=UTF-8",
+				success: function (data, textStatus, request) {
+					$("#locker").fadeTo(1000, 0);
+					$("#locker").hide();
+					if (data.ok) {
+						console.log(data)
+					}
+				}
+			});
+		}
 	</script>
 {%- endblock -%}
 {%- block script -%}

@@ -23,13 +23,13 @@ class AvatarStore(Store):
 	"""
 
 	@staticmethod
-	def create(user_id: int, soundfile_uid: str) -> Avatar:
+	def create(user_id: int, sid_data: str) -> Avatar:
 		"""
 		Create and return avatar.
 		"""
 		return super(AvatarStore, AvatarStore).create(
 			Avatar(
-				user_id, soundfile_uid, False
+				user_id, sid_data
 			)
 		)
 
@@ -43,12 +43,14 @@ class AvatarStore(Store):
 		)
 
 	@staticmethod
-	def update(uid: str, user_id: int, soundfile_uid: str) -> Avatar:
+	def update(uid: str, user_id: int, sid_data: str,
+						 soundfile_uid: str) -> Avatar:
 		"""
 		Update and return avatar.
 		"""
 		avatar = AvatarStore.read(uid)
 		avatar.user_id = user_id
+		avatar.sid_data = sid_data
 		avatar.soundfile_uid = soundfile_uid
 		return super(AvatarStore, AvatarStore).update(
 			avatar
@@ -64,42 +66,42 @@ class AvatarStore(Store):
 		)
 
 	@staticmethod
-	def set_used(uid: str) -> Avatar:
+	def update_sid(uid: str, sid_data: str) -> Avatar:
 		"""
-		Switch avatar used attribute and return avatar.
+		Update avatar sid_data and return avatar.
 		"""
 		avatar = super(AvatarStore, AvatarStore).read(
 			Avatar, uid
 		)
-		avatar.used = True
+		avatar.sid_data = sid_data
 		return super(AvatarStore, AvatarStore).update(
 			avatar
 		)
 
 	@staticmethod
 	def read_list(offset: int, limit: int,
-							  user_id: int, soundfile_uid: str,
-								used: bool) -> list:
+							  user_id: int, sid_data: str,
+							  soundfile_uid: str) -> list:
 		"""
 		Return list of avatar by arguments.
 		"""
 		return _get_list_query(
-			user_id, soundfile_uid, used
+			user_id, sid_data, soundfile_uid
 		).limit(limit).offset(offset).all()
 
 	@staticmethod
-	def count_list(user_id: int, soundfile_uid: str,
-								 used: bool) -> list:
+	def count_list(user_id: int, sid_data: str,
+								 soundfile_uid: str) -> list:
 		"""
 		Return list of avatar by arguments.
 		"""
 		return Store.count(_get_list_query(
-			user_id, soundfile_uid, used
+			user_id, sid_data, soundfile_uid
 		))
 
 
-def _get_list_query(user_id: int, soundfile_uid: str,
-										used: bool):
+def _get_list_query(user_id: int, sid_data: str,
+										soundfile_uid: str):
 	"""
 	Return query object for avatar based on arguments.
 	"""
@@ -108,10 +110,10 @@ def _get_list_query(user_id: int, soundfile_uid: str,
 	).filter(
 		True if user_id is None else \
 			Avatar.user_id == user_id,
+		True if sid_data is None else \
+			Avatar.sid_data.ilike('%' + sid_data + '%'),
 		True if soundfile_uid is None else \
 			Avatar.soundfile_uid == soundfile_uid,
-		True if used is None else \
-			Avatar.used == used,
 		Avatar.deleted_utc == None
 	).order_by(
 			Avatar.modified_utc.desc()

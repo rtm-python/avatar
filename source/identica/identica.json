@@ -1,6 +1,6 @@
 {
 	"name": "IDENTICA",
-	"token": "1411351548:AAENHgrIH1576uQK6CdHYrWSbKlGCgLV1dU",
+	"token": "1411351548:AAF8fSKn7m5T70HUByhdkhPssaVfMzhPBMQ",
 	"website": "Avatar",
 	"auth_url": "http://192.168.44.150:5000/identica/%s",
 	"bot_url": {

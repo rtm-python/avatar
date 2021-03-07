@@ -14,35 +14,75 @@
 			</div>
 		</div>
 	</div>
-	<div id="avatar" class="d-flex align-items-center row" style="height: 100vh;">
-		<div class="text-center">
-			<img src="" alt="" style="max-width: 100%; max-height: 100%; height: 100%;" />
+	<div class="d-flex align-items-center row" style="height: 100vh;">
+		<div class="avatar-list text-center">
+			<img class="avatar-face" src="" style="max-width: 100%; max-height: 100%; height: 100%;"/>
 		</div>
+	</div>
+	<div class="d-none avatar-sample" id="">
+		<img src="" alt="" style="max-width: 100%; max-height: 100%; height: 100%;"/>
+		<audio><source src="" type=""></audio>
 	</div>
 {%- endblock -%}
 {%- block body_script -%}
 	<script type="text/javascript">
+		var user_uid = '';
 		$(window).on('load', function() {
 			// Prepare avatar page
-			$("#avatar").fadeTo(0, 0);
-<!--			setInterval(loadNext, 500);-->
+			$(".avatar-list").fadeTo(0, 0);
 			// SocketIO initiate
 			var socket = io();
-			socket.on( 'connect', function() {
-				console.log('connect')
-				socket.emit( 'avatar_connected', {
-					data: 'Some Data'
-				})
-<!--				var form = $( 'form' ).on( 'submit', function( e ) {-->
-<!--					e.preventDefault()-->
-<!--					let user_name = $( 'input.username' ).val()-->
-<!--					let user_input = $( 'input.message' ).val()-->
-<!--					socket.emit( 'my event', {-->
-<!--						user_name : user_name,-->
-<!--						message : user_input-->
-<!--					})-->
-<!--					$( 'input.message' ).val( '' ).focus()-->
-<!--				})-->
+			socket.on('connect', function() {
+				var avatar_list = [];
+				$('[class*="avatar-item"]').each(function() {
+					avatar_list.push($(this).attr("id"));
+				});
+				socket.emit('avatar_connected', {
+					avatar_list: avatar_list
+				});
+				console.log("Connecting to server success");
+			})
+			socket.on('clear_data', function(data, callback) {
+				if (data.avatar_list) {
+					data.avatar_list.forEach(function(item, index) {
+						console.log(item.uid + ' clearing...');
+						$("#" + item.uid).remove();
+						if (callback) callback("cleared");
+						console.log(item.uid + " cleared");
+					});
+				} else {
+					$(".avatar-list").fadeTo(500, 0);
+					$(".avatar-face").attr("src", "");
+					$('[class*="avatar-item"]').each(function() {
+						var uid = $(this).attr("id");
+						console.log(uid + ' clearing...');
+						$(this).remove();
+						if (callback) callback("cleared");
+						console.log(uid + " cleared");
+					});
+				}
+			})
+			socket.on('load_data', function(data, callback) {
+				console.log(data.uid + " loading...");
+				var clone = $('[class*="avatar-sample"]').clone();
+				$(clone).attr("id", data.uid);
+				$(clone).attr("class", "d-none avatar-item");
+				$(clone).children("img").attr("src", data.image.src);
+				$(clone).children("audio").children("source").attr("src", data.audio.src);
+				$(clone).children("audio").children("type").attr("type", data.audio.type);
+				$(clone).appendTo($('[class*="avatar-list"]'));
+				if (callback) callback(data.uid + " loaded");
+				console.log(data.uid + " loading complete");
+			})
+			socket.on('play_data', function(data, callback) {
+				$(".avatar-list").fadeTo(0, 0);
+				$(".avatar-face").attr("src", "");
+				console.log(data.uid + " play starting...");
+				$(".avatar-face").attr("src", data.image.src);
+				$(".avatar-list").fadeTo(1000, 1);
+				$("#" + data.uid).play();
+				if (callback) callback(data.uid + " playing...");
+				console.log(data.uid + " playing...");
 			})
 		})
 	</script>

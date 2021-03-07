@@ -174,7 +174,7 @@ def upload_soundfile():
 				form.filename.errors = ['Invalid value.']
 			else:
 				soundfile = SoundfileStore.create(
-					form.name.data, form.description.data, file
+					form.name.data, form.description.data, file, file.content_type
 				)
 				return redirect(url_for('gallery.get_soundfile_catalog'))
 	return render_template(
@@ -205,7 +205,7 @@ def update_soundfile(uid: str):
 					) and not form.filename.data.startswith('#'):
 				form.filename.errors = ['Invalid value.']
 			SoundfileStore.update(
-				uid, form.name.data, form.description.data, file
+				uid, form.name.data, form.description.data, file, file.content_type
 			)
 			return redirect(url_for('gallery.get_soundfile_catalog'))
 	return render_template(

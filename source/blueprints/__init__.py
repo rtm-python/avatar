@@ -8,6 +8,7 @@ Initial blueprints module to define blueprints.
 import secrets
 import importlib
 import json
+import logging
 
 # Application modules import
 from config import CONFIG
@@ -21,10 +22,12 @@ from config import BLUEPRINTS_ROOT_HANDLER
 from flask import Flask
 from flask import session
 from flask import request
+from flask import send_from_directory
 from flask_paranoid import Paranoid
 from flask_login import LoginManager
 from flask_login import UserMixin
 from flask_login import AnonymousUserMixin
+from flask_login import current_user
 from flask_socketio import SocketIO
 
 # Initiate Flask object
@@ -34,8 +37,8 @@ application = Flask(
 )
 application.config['SECRET_KEY'] = CONFIG['web']['secret_key']
 application.config['MAX_CONTENT_LENGTH'] = CONFIG['web']['max_content_length']
-application.config['SERVER_NAME'] = \
-	'%s:%d' % (CONFIG['web']['host'], CONFIG['web']['port'])
+#application.config['SERVER_NAME'] = \
+#	'%s:%d' % (CONFIG['web']['host'], CONFIG['web']['port'])
 
 # Create SocketIO object
 socketio = SocketIO()
@@ -101,8 +104,6 @@ for module_name, url_prefix in BLUEPRINTS_NAME_WITH_URL_PREFIX:
 paranoid = Paranoid(application)
 paranoid.redirect_view = BLUEPRINTS_ROOT_HANDLER
 
-# Initiate SocketIO object
-socketio.init_app(application)
 
 # Import UserStore from models
 from models import UserStore
@@ -114,6 +115,28 @@ def load_user(user_id):
 	Return SignedInUser object linked to User entity by uid.
 	"""
 	return SignedInUser(UserStore.read(user_id))
+
+
+# Initiate SocketIO object
+socketio.init_app(application, cors_allowed_origins='*')
+
+
+def socketio_authenticated() -> bool:
+	"""
+	Extra verify authenticated for socketio connections.
+	"""
+	return current_user.is_authenticated and \
+		current_user.user is not None
+
+
+def socketio_status(message):
+	"""
+	Status update acknowledge with message.
+	"""
+	try:
+		logging.info('%s %s' % (request.sid, message))
+	except:
+		logging.info('%s' % message)
 
 
 @application.before_request
@@ -217,3 +240,10 @@ def set_value(name: str, value: int) -> None:
 	args = session.get('args') or {}
 	args[name] = value
 	session['args'] = args
+
+
+def send_image(filename: str) -> object:
+	"""
+	Return file to response for request.
+	"""
+	return send_from_directory('source/files', filename)

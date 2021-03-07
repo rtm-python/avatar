@@ -26,13 +26,14 @@ class SoundfileStore(Store):
 
 	@staticmethod
 	def create(name: str, description: str,
-						 file: object) -> Soundfile:
+						 file: object, filetype: str) -> Soundfile:
 		"""
 		Create and return soundfile.
 		"""
 		return super(SoundfileStore, SoundfileStore).create(
 			Soundfile(
-				name, description, save_file(file), datetime.utcnow(), False
+				name, description, save_file(file), filetype,
+				datetime.utcnow(), False
 			)
 		)
 
@@ -47,7 +48,7 @@ class SoundfileStore(Store):
 
 	@staticmethod
 	def update(uid: str, name: str, description: str,
-						 file: object) -> Soundfile:
+						 file: object, filetype: str) -> Soundfile:
 		"""
 		Update and return soundfile.
 		"""
@@ -56,6 +57,7 @@ class SoundfileStore(Store):
 		soundfile.description = description
 		if file is not None:
 			soundfile.filename = save_file(file, soundfile.filename)
+			soundfile.filetype = filetype
 		return super(SoundfileStore, SoundfileStore).update(
 			soundfile
 		)

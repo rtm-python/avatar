@@ -6,8 +6,10 @@ Blueprint module to handle player routes.
 
 # Standard libraries import
 import logging
+import json
 
 # Application modules import
+import blueprints
 from blueprints import socketio
 from blueprints.avatar import blueprint
 from models.avatar_store import AvatarStore
@@ -23,6 +25,7 @@ from flask import redirect
 from flask import request
 from flask import url_for
 from flask import render_template
+from flask_socketio import disconnect
 
 
 @blueprint.route('/player/', methods=('GET', 'POST'))
@@ -30,22 +33,94 @@ def get_player():
 	"""
 	Return player page.
 	"""
-	if not current_user.is_authenticated:
-		return redirect(url_for('base.get_home'))
-	if request.method == 'POST':
+#	if not current_user.is_authenticated:
+#		return redirect(url_for('base.get_home'))
+	if request.json is not None and request.json.get('uidPlay'):
 		avatar_list = AvatarStore.read_list(
-			0, 1, current_user.user.id, None, False
+			1, 0, current_user.user.id, None, None
 		)
-		if avatar_list is None or len(avatar_list) == 0:
-			return {}
-		avatar = avatar_list[0]
-		AvatarStore.set_used(avatar.uid)
-		return { "soundfile_uid": avatar.soundfile_uid }
+		if len(avatar_list) > 0:
+			avatar = avatar_list[0]
+			sid_data = json.loads(avatar.sid_data)
 	return render_template(
 		'avatar/player.html'
 	)
 
 
+@socketio.on('connect')
+def handle_connect():
+	"""
+	Create or update avatar with sid_data for connected user.
+	"""
+	if not blueprints.socketio_authenticated():
+#		disconnect()
+		return
+	avatar_list = AvatarStore.read_list(
+		1, 0, current_user.user.id, None, None
+	)
+	if len(avatar_list) == 0:
+		avatar = AvatarStore.create(
+			current_user.user.id,
+			json.dumps({'sid_list': [request.sid]})
+		)
+	else:
+		avatar = avatar_list[0]
+		sid_data = json.loads(avatar.sid_data)
+		if request.sid not in sid_data['sid_list']:
+			sid_data['sid_list'] += [request.sid]
+		AvatarStore.update_sid(
+			avatar.uid, json.dumps(sid_data)
+		)
+	logging.debug(
+		'Avatar connected: %s (%s)' % (
+			' '.join([current_user.user.first_name, current_user.user.last_name]),
+			request.sid
+		)
+	)
+
+
+@socketio.on('disconnect')
+def handle_disconnect():
+	"""
+	Remove sid from avatar for disconnected user.
+	"""
+	if not blueprints.socketio_authenticated():
+		return
+	avatar_list = AvatarStore.read_list(
+		1, None, current_user.user.id, None, None
+	)
+	if len(avatar_list) > 0:
+		avatar = avatar_list[0]
+		sid_data = json.loads(avatar.sid_data)
+		if request.sid in sid_data['sid_list']:
+			sid_data['sid_list'].remove(request.sid)
+		AvatarStore.update_sid(
+			avatar.uid, json.dumps(sid_data)
+		)
+	logging.debug(
+		'Avatar disconnected: %s (%s)' % (
+			' '.join([current_user.user.first_name, current_user.user.last_name]),
+			request.sid
+		)
+	)
+
+
 @socketio.on('avatar_connected')
-def handle_avatar_connected(json):
-	print('Avatar Connected: %s' % json)
+def handle_avatar_connected(data):
+	logging.debug(
+		'%s [Avatar: %s] connected with loaded data: %s' % (
+			' '.join([
+				current_user.user.first_name,
+				current_user.user.last_name
+			]) if blueprints.socketio_authenticated() else 'Anonymous User',
+			request.sid, data
+		)
+	)
+	socketio.emit(
+		'clear_data',
+		{
+			'avatar_list': data.get('avatar_list')
+		},
+		room=request.sid,
+		callback=blueprints.socketio_status
+	)

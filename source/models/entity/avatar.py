@@ -25,15 +25,13 @@ class Avatar(Entity):
 		database.Integer, ForeignKey('user.id'),
 		index=True, nullable=False
 	)
-	soundfile_uid = Column(database.String, index=True, nullable=False)
-	used = Column(database.Boolean, index=True, nullable=False)
+	sid_data = Column(database.String, index=True, nullable=False)
+	soundfile_uid = Column(database.String, index=True, nullable=True)
 
-	def __init__(self, user_id: int, soundfile_uid: str,
-							 used: bool) -> "Soundfile":
+	def __init__(self, user_id: int, sid_data: str) -> "Avatar":
 		'''
 		Initiate object and stores avatar's data.
 		'''
 		super().__init__()
 		self.user_id = user_id
-		self.soundfile = soundfile
-		self.used = used
+		self.sid_data = sid_data
