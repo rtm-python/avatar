@@ -15,7 +15,7 @@
 					<div class="row g-3">
 						<div class="offset-1 col-10 text-center form-floating mb-1">
 							<input autofocus type="password" class="form-control form-control-sm text-center" id="{{ form.pin.label.text }}" name="{{ form.pin.label.text }}" placeholder="{{ __('Personal Identification Number (PIN)') }}" value="{{ form.pin.data|default('', True) }}" {%- if form.password.data -%}{{ ' readonly' }}{%- endif -%} />
-							<label style="color: lightgrey; right: 0;" for="{{ form.pin.label.text }}">{{ __('Personal Identification Number (PIN)') }}</label>
+							<label class="self-items-middle" style="color: lightgrey; right: 0;" for="{{ form.pin.label.text }}">{{ __('Personal Identification Number (PIN)') }}</label>
 						</div>
 						{%- if form.password.data -%}
 							<div class="offset-1 col-10 text-center form-floating mb-1">

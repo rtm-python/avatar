@@ -29,7 +29,7 @@ done
 if [ ! -z $INITIAL ]
 then
 	pip install flask flask-login flask-paranoid flask-wtf flask-sqlalchemy flask-migrate \
-		&& pip install requests uwsgi flask-socketio gevent gevent-websocket \
+		&& pip install requests uwsgi flask-socketio gevent gevent-websocket pillow opencv-python \
 		&& pip freeze > requirements.txt \
 		&& deactivate \
 		&& echo '[+] Virtual environment ".venv" initiated (freezed to requirements.txt)'

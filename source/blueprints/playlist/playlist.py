@@ -67,7 +67,10 @@ def get_playlist():
 						{
 							'uid': uid,
 							'image': {
-								'src': url_for('playlist.get_image', filename='video-to-gif-sample.gif')
+								'src': url_for(
+									'playlist.get_image',
+									filename='sample.gif'
+								)
 							},
 							'audio': {
 								'src': url_for(
@@ -100,7 +103,10 @@ def get_playlist():
 					{
 						'uid': uid,
 						'image': {
-							'src': url_for('playlist.get_image', filename='video-to-gif-sample.gif')
+							'src': url_for(
+								'playlist.get_image',
+								filename='sample.gif'
+							)
 						},
 						'audio': {
 							'src': url_for(

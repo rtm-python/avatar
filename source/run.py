@@ -13,6 +13,7 @@ sys.path.append('source')
 
 # Application moudles import
 import blueprints
+from config import CONFIG
 from models import database
 from identica import IdenticaManager
 
@@ -39,4 +40,8 @@ def run_socketio():
 # Run application on executing module
 if __name__ == '__main__':
 #	application.run(threaded=True)
-	socketio.run(application)
+	socketio.run(
+		application,
+		host=CONFIG['web']['host'],
+		port=CONFIG['web']['port']
+	)

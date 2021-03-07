@@ -31,14 +31,14 @@
 						<div class="soundfile-uid d-none" id="{{ soundfile.uid }}"></div>
 						<div class="card h-100">
 							<div class="row g-0">
-								<div class="col-12 col-md-4" style="background-color: lightgrey;">
+								<div class="col-12 col-sm-4" style="background-color: lightgrey;">
 									<div style="width: 100%; padding-top: 56.25%; position: relative;">
 										<div class="text-center text-muted" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; font-size: 0.75rem;">
-											<img src="{{ url_for('playlist.get_image', filename='video-to-gif-sample.gif') }}" alt="{{ __('Render not found') }}" style="max-width: 100%; max-height: 100%; height: 100%;">
+											<img src="{{ url_for('playlist.get_image', filename='sample.gif') }}" alt="{{ __('Render not found') }}" style="max-width: 100%; max-height: 100%; height: 100%;">
 										</div>
 									</div>
 								</div>
-								<div class="col-12 col-md-8">
+								<div class="col-12 col-sm-8">
 									<div class="h-100 d-flex flex-column">
 										<div class="w-100 card-body pb-1 mb-auto">
 											<a href="javascript:playSoundfile('{{ soundfile.uid }}');" class="stretched-link"></a>
@@ -85,27 +85,27 @@
 			$('[class*="modified-timestamp"]').each(function() {
 				this.innerText = moment(this.innerText).tz(user_tz).fromNow() + moment(this.innerText).tz(user_tz).format(', HH:mm:ss, DD MMMM YYYY, dddd');
 			});
-		});
-		// Sortable headlines (jquery-ui)
-		$(function() {
-			if ($(window).width() >= 1024) {
-				$("#sortable").sortable({
-					placeholder: "content-sortable-highlight"
-				});
-				$("#sortable").on("sortchange", function() {
-					$('[href="javascript:reorderSoundfiles();"]').fadeTo(2000, 1);
-				});
-			{%- if not mobile -%}
-				} else {
-					window.location.href = "{{ url_for('playlist.get_playlist', mobile=True) }}"
-				}
-			{%- else -%}
-				}
-			{%- endif -%}
+			// Sortable headlines (jquery-ui)
 			$('[href="javascript:reorderSoundfiles();"]').fadeTo(0, 0.25);
 			$("#locker").fadeTo(0, 0.25);
 			$("#locker").hide();
-			$("#sortable").disableSelection();
+			if ($(window).width() >= 1024) {
+				{%- if mobile -%}
+					window.location.href = "{{ url_for('playlist.get_playlist', mobile=False) }}";
+				{%- else -%}
+					$("#sortable").sortable({
+						placeholder: "content-sortable-highlight"
+					});
+					$("#sortable").on("sortchange", function() {
+						$('[href="javascript:reorderSoundfiles();"]').fadeTo(2000, 1);
+					});
+					$("#sortable").disableSelection();
+				{%- endif -%}
+			} else {
+				{%- if not mobile -%}
+					window.location.href = "{{ url_for('playlist.get_playlist', mobile=True) }}";
+				{%- endif -%}
+			}
 		});
 		function reorderSoundfiles() {
 			if ($('[href="javascript:reorderSoundfiles();"]').css("opacity") == 1) {
@@ -130,7 +130,7 @@
 					}
 				});
 			}
-		}
+		};
 		function renderSoundfiles() {
 			$("#locker").show();
 			$("#locker").fadeTo(1000, 1);
@@ -152,7 +152,7 @@
 					}
 				}
 			});
-		}
+		};
 		function playSoundfile(uid) {
 			$("#locker").show();
 			$("#locker").fadeTo(1000, 1);
@@ -170,12 +170,11 @@
 					}
 				}
 			});
-		}
+		};
 	</script>
 {%- endblock -%}
 {%- block script -%}
 	{%- if not mobile -%}
-		<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous"></script>
 	{%- endif -%}
 {%- endblock -%}
-

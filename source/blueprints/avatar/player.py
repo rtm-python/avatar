@@ -33,8 +33,8 @@ def get_player():
 	"""
 	Return player page.
 	"""
-#	if not current_user.is_authenticated:
-#		return redirect(url_for('base.get_home'))
+	if not current_user.is_authenticated:
+		return redirect(url_for('base.get_home'))
 	if request.json is not None and request.json.get('uidPlay'):
 		avatar_list = AvatarStore.read_list(
 			1, 0, current_user.user.id, None, None
@@ -53,7 +53,7 @@ def handle_connect():
 	Create or update avatar with sid_data for connected user.
 	"""
 	if not blueprints.socketio_authenticated():
-#		disconnect()
+		disconnect()
 		return
 	avatar_list = AvatarStore.read_list(
 		1, 0, current_user.user.id, None, None

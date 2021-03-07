@@ -1,36 +1,65 @@
 from PIL import Image
-
-#ASCII_CHARS = [' ', '⬝', '·', '•']
-ASCII_CHARS = [' ', ' ', '▁', '▂', '▃', '▄', '▅', '▆', '▇', '█']
-
-D_VALUE = 256 // len(ASCII_CHARS) + 1
+import cv2
+import imutils
+import numpy
 
 
-def convert(filepath: str, width: int, aspect: float,
-						white_background: bool = False):
-	char_list = list(reversed(ASCII_CHARS)) \
-		if white_background else ASCII_CHARS
-	image = Image.open(filepath)
-	# Resize image
-	iw, ih = image.size
-	height = int(width * ih / iw / aspect)
-	image = image.resize((width, height))
-	# Convert image to greyscale and define chars
-	greyscale_image = image.convert('L')
-	ascii_str = ""
-	for pixel in greyscale_image.getdata():
-		ascii_str += char_list[pixel//D_VALUE];
-	# Form string lines from chars
-	ascii_img = []
-	for i in range(0, len(ascii_str), greyscale_image.width):
-		ascii_img += [ascii_str[i: i + greyscale_image.width]]
-	return ascii_img
-#	with open(filepath + ".txt", "w") as file:
-#		file.write(ascii_img);
+def convert_capture(source, width, color, invert, output) -> None:
+	"""
+	"""
+	print('Starting...')
+	frame_list = []
+	cap = cv2.VideoCapture(source)
+	try:
+		while True:
+			ret, frame = cap.read()
+			if not ret:
+				break
+			result = convert_frame(frame, width, color, invert)
+			cv2.imshow(str(source), frame)
+			cv2.imshow('result', result)
+			if cv2.waitKey(1) == 27:
+				break
+			frame_list += [Image.fromarray(result)]
+	except KeyboardInterrupt:
+		print('Interrupting...')
+	except Exception as exc:
+		print(exc.message)
+	im = frame_list[0]
+	im.save(
+		output, format='GIF', append_images=frame_list,
+		save_all=True, duration=100, loop=1, transparency=0
+	)
+
+
+def convert_frame(frame, width, color, invert) -> list:
+	"""
+	"""
+	scale = 10
+	frame_height, frame_width = frame.shape[:2]
+	height = width * frame_height // frame_width
+	frame = imutils.resize(frame, width=width // scale, height=height // scale)
+	frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+	frame = cv2.flip(frame, 1)
+	if invert:
+		frame = cv2.bitwise_not(frame)
+	frame = Image.fromarray(frame)
+	d_value = 255 // scale * 2
+	pixels = []
+	for pixel in frame.getdata():
+		pixels += [pixel // d_value];
+	result = numpy.zeros((int(height), int(width), 4), dtype=numpy.uint8)
+	y = scale // 2
+	for i in range(0, len(pixels), frame.width):
+		x = scale // 2
+		for pixel in pixels[i: i + frame.width]:
+			if pixel > 1:
+				cv2.circle(result, (x, y), pixel, color, -1)
+			x += scale
+		y += scale
+	return result
 
 
 if __name__ == '__main__':
-	filepath = '/home/rt/Downloads/face.png'
-	ascii_img = convert(filepath, 24, 2.2, False)
-	with open(filepath + ".txt", "w") as file:
-		file.write('\n'.join(ascii_img));
+	convert_capture(0, 1024, (200, 255, 180, 200), False, 'sample.gif')
+
