@@ -25,7 +25,7 @@ def run_identica():
 	"""
 	Run IdenticaManager to communicate with Identica Bot.
 	"""
-	IdenticaManager(debug_mode=True).run()
+	IdenticaManager().run()
 
 
 @application.cli.command('run-socketio')

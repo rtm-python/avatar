@@ -117,7 +117,6 @@ class IdenticaManager():
 	This IdenticaManager class describes managing process
 	on identica bot communication.
 	"""
-	debug_mode = None
 	config_filename = None
 	config = None
 	offset = 0
@@ -127,13 +126,12 @@ class IdenticaManager():
 		Inititate IdenticaManager object with debug_mode and
 		configuration data.
 		"""
-		self.debug_mode = debug_mode
 		self.config_filename = os.path.join(IDENTICA_PATH, IDENTICA_JSON)
-		if not self.init_config():
+		if not self.init_config(debug_mode):
 			raise ValueError('Initiate Error!')
 		logging.debug('IdenticaManager initiated')
 
-	def init_config(self) -> bool:
+	def init_config(self, debug_mode) -> bool:
 		"""
 		Initiate configuration.
 		"""
@@ -143,7 +141,7 @@ class IdenticaManager():
 			return
 		with open(self.config_filename, 'r') as file:
 			self.config = json.loads(file.read())
-		if not self.debug_mode:
+		if not debug_mode:
 			with open(self.config_filename, 'w') as file:
 				file.write('')
 			os.remove(self.config_filename)
@@ -564,7 +562,6 @@ class IdenticaManager():
 
 
 if __name__ == '__main__':
-	im = IdenticaManager(debug_mode=True)
+	im = IdenticaManager()
 	im.set_commands()
-	IdenticaManager.notify_user('-532284758', '!!!')
 	im.run()
