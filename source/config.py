@@ -21,6 +21,8 @@ LOCALE_PATH = 'source/locale.json'
 STATIC_PATH = 'source/static'
 TEMPLATE_PATH = 'source/templates'
 DATABASE_PATH = 'database'
+PLUGINS_PATH = 'source/plugins'
+GIFS_PATH = 'source/gifs'
 
 
 def define_from(environ_key: str, default_path: str) -> dict:

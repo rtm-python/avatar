@@ -8,8 +8,9 @@
 	<div class="ui-element" style="position: absolute; left: 0; top: 0; right: 0; padding: 0 1rem;">
 		<div class="col-12 offset-md-1 col-md-10 offset-lg-2 col-lg-8">
 			<div class="d-flex w-100 justify-content-between mt-3">
-				<div style="border-radius: 2rem; background-color: rgba(255, 255, 255, 0.9); margin: 0 -0.5rem; padding: 0 0.5rem;">
-					<h1 class="m-0">{{ __('Avatar') }}</h1>
+				<div class="d-flex align-items-center" style="border-radius: 2rem; background-color: rgba(255, 255, 255, 0.9); margin: 0 -0.5rem; padding: 0 0.5rem;">
+					<h1 class="m-0 d-inline">{{ __('Avatar') }}</h1>
+					<div class="d-inline m-2"><span id="loadSpinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span></div>
 				</div>
 			</div>
 		</div>
@@ -20,13 +21,14 @@
 		</div>
 	</div>
 	<div class="d-none avatar-sample" id="">
-		<img src="" alt="" style="max-width: 100%; max-height: 100%; height: 100%;"/>
-		<audio><source src="" type=""></audio>
+		<img src="" alt=""/>
+		<audio preload="auto"><source src="" type=""></audio>
 	</div>
 {%- endblock -%}
 {%- block body_script -%}
 	<script type="text/javascript">
 		var user_uid = '';
+		var preloadCount = 0;
 		$(window).on('load', function() {
 			// Prepare avatar page
 			$(".avatar-list").fadeTo(0, 0);
@@ -42,7 +44,9 @@
 				});
 				console.log("Connecting to server success");
 			})
+			$("#loadSpinner").hide();
 			socket.on('clear_data', function(data, callback) {
+				$("#loadSpinner").show();
 				if (data.avatar_list) {
 					data.avatar_list.forEach(function(item, index) {
 						console.log(item.uid + ' clearing...');
@@ -61,6 +65,7 @@
 						console.log(uid + " cleared");
 					});
 				}
+				$("#loadSpinner").hide();
 			})
 			socket.on('load_data', function(data, callback) {
 				console.log(data.uid + " loading...");
@@ -69,6 +74,7 @@
 				console.log(data.uid + " loading complete");
 			})
 			socket.on('play_data', function(data, callback) {
+				$("#loadSpinner").show();
 				$(".avatar-list").fadeTo(0, 0);
 				$(".avatar-face").attr("src", "");
 				console.log(data.uid + " play starting...");
@@ -78,6 +84,7 @@
 				$("#" + data.uid).children("audio")[0].play();
 				if (callback) callback(data.uid + " playing...");
 				console.log(data.uid + " playing...");
+				$("#loadSpinner").hide();
 			})
 		})
 		function loadData(data) {
@@ -89,16 +96,31 @@
 				}
 			}
 			if ($(avatarItem).length == 0) {
+				$("#loadSpinner").show();
 				var clone = $('[class*="avatar-sample"]').clone();
 				$(clone).attr("id", data.uid);
 				$(clone).attr("class", "d-none avatar-item");
+				preloadCount++;
 				$(clone).children("img").attr("src", data.image.src);
+				$(clone).children("img").on('load', function() {
+					preloadCount--;
+					if (preloadCount == 0) {
+						$("#loadSpinner").hide();
+					}
+				});
+				preloadCount++;
 				$(clone).children("audio").children("source").attr("src", data.audio.src);
-				$(clone).children("audio").children("type").attr("type", data.audio.type);
-				$(clone).appendTo($('[class*="avatar-list"]'));
+				$(clone).children("audio").children("source").attr("type", data.audio.type);
 				$(clone).children("audio").on('ended', function() {
 					$(".avatar-list").fadeTo(500, 0);
 				});
+				$(clone).children("audio").on('canplaythrough', function() {
+					preloadCount--;
+					if (preloadCount == 0) {
+						$("#loadSpinner").hide();
+					}
+				});
+				$(clone).appendTo($('[class*="avatar-list"]'));
 			}
 		}
 	</script>

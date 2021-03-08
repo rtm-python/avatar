@@ -68,13 +68,14 @@ def get_playlist():
 							'uid': uid,
 							'image': {
 								'src': url_for(
-									'playlist.get_image',
-									filename='video2.gif'
+									'gallery.get_image',
+									filename=soundfile.uid
 								)
 							},
 							'audio': {
 								'src': url_for(
-									'gallery.get_audio', filename=soundfile.filename
+									'gallery.get_audio',
+									filename=soundfile.filename
 								),
 								'type': soundfile.filetype
 							},
@@ -104,8 +105,8 @@ def get_playlist():
 						'uid': uid,
 						'image': {
 							'src': url_for(
-								'playlist.get_image',
-								filename='video2.gif'
+								'gallery.get_image',
+								filename=soundfile.uid
 							)
 						},
 						'audio': {
@@ -134,23 +135,3 @@ def get_playlist():
 		soundfile_list=soundfile_list,
 		mobile=blueprints.get_value('mobile', bool, False)
 	)
-
-
-@blueprint.route('/soundfile/catalog/audio/<filename>/', methods=('GET',))
-def get_audio(filename: str):
-	"""
-	Return audio file.
-	"""
-	if not current_user.is_authenticated:
-		abort(403)
-	return send_file(filename)
-
-
-@blueprint.route('/soundfile/catalog/image/<filename>/', methods=('GET',))
-def get_image(filename: str):
-	"""
-	Return image file.
-	"""
-	if not current_user.is_authenticated:
-		abort(403)
-	return blueprints.send_image(filename)

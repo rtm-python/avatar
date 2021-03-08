@@ -15,6 +15,7 @@ from config import CONFIG
 from config import LOCALE
 from config import STATIC_PATH
 from config import TEMPLATE_PATH
+from config import GIFS_PATH
 from config import BLUEPRINTS_NAME_WITH_URL_PREFIX
 from config import BLUEPRINTS_ROOT_HANDLER
 
@@ -246,4 +247,4 @@ def send_image(filename: str) -> object:
 	"""
 	Return file to response for request.
 	"""
-	return send_from_directory('source/files', filename)
+	return send_from_directory(GIFS_PATH, filename)

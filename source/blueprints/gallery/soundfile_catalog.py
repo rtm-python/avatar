@@ -8,6 +8,7 @@ Blueprint module to handle soundfile catalog routes.
 from datetime import datetime
 from datetime import timedelta
 import logging
+import os
 
 # Application modules import
 from blueprints.gallery import blueprint
@@ -19,6 +20,10 @@ from models.soundfile_store import SoundfileStore
 from models.entity.soundfile import Soundfile
 from models import send_file
 from config import CONFIG
+from config import GIFS_PATH
+from config import PLUGINS_PATH
+from config import define_list
+from plugins.bubble import BubbleVideo
 
 # Additional libraries import
 from flask import render_template
@@ -49,6 +54,30 @@ class CatalogFilterForm(FilterForm):
 		super(CatalogFilterForm, self).__init__('soundfileCatalog')
 		self.used.choices = \
 			[('used', 'Used')] + [('yes', 'Yes'), ('no', 'No')]
+
+
+class RendererForm(FlaskForm):
+	"""
+	This is RendererForm class to retrieve form data.
+	"""
+	preset = SelectField('rendererPreset')
+	submit = SubmitField('rendererSubmit')
+
+	def __init__(self) -> "RendererForm":
+		"""
+		Initiate object with values from request.
+		"""
+		super(RendererForm, self).__init__()
+		self.preset.choices = [('preset', 'Preset')] + \
+			[
+				(
+					filename[: len(filename) - 4], filename[: len(filename) - 4]
+				) for filename in define_list(PLUGINS_PATH, '.gif')
+			]
+		for field in self:
+			if field.name != 'csrf_token':
+				data = request.form.get(field.label.text)
+				field.data = data if data is not None and len(data) > 0 else None
 
 
 class SoundfileForm(FlaskForm):
@@ -190,12 +219,30 @@ def update_soundfile(uid: str):
 	"""
 	if not current_user.is_authenticated:
 		return redirect(url_for('base.get_home'))
+	# Handle renderer form
+	is_renderer_post = False
+	renderer = RendererForm()
+	if renderer.validate_on_submit() and \
+			request.form.get(renderer.submit.label.text) is not None:
+		if renderer.preset.data != renderer.preset.choices[0][0]:
+			preset_path = os.path.join(
+				PLUGINS_PATH, '%s.gif' % renderer.preset.data)
+			gif_path = os.path.join(GIFS_PATH, uid)
+			soundfile_seconds = 100
+			frame_start = 0
+			frame_count = int(1000 / 85 * soundfile_seconds) + 10
+			BubbleVideo.copy_gif(
+				preset_path, gif_path, frame_start, frame_count, 85
+			)
+			return redirect(url_for('gallery.get_soundfile_catalog'))
+		is_renderer_post = True
 	# Handle soundfile form
 	form = SoundfileForm(
-	SoundfileStore.read(uid) \
-		if request.method == 'GET' else None
+		SoundfileStore.read(uid) \
+			if request.method == 'GET' or is_renderer_post else None
 	)
-	if form.validate_on_submit():
+	if form.validate_on_submit() and \
+			request.form.get(form.submit.label.text) is not None:
 		if form.filename.data is None:
 			form.filename.errors = ['Value required.']
 		else:
@@ -210,7 +257,8 @@ def update_soundfile(uid: str):
 			return redirect(url_for('gallery.get_soundfile_catalog'))
 	return render_template(
 		'gallery/soundfile.html',
-		form=form
+		form=form,
+		renderer=renderer
 	)
 
 
@@ -246,3 +294,13 @@ def get_audio(filename: str):
 	if not current_user.is_authenticated:
 		abort(403)
 	return send_file(filename)
+
+
+@blueprint.route('/soundfile/catalog/image/<filename>/', methods=('GET',))
+def get_image(filename: str):
+	"""
+	Return image file.
+	"""
+	if not current_user.is_authenticated:
+		abort(403)
+	return blueprints.send_image(filename)

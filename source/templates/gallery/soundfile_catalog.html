@@ -59,19 +59,30 @@
 						<div class="card h-100">
 							<div class="card-body pb-1">
 								<a href="{{ url_for('gallery.update_soundfile', uid=soundfile.uid) }}" class="stretched-link"></a>
-								<h5 class="d-flex w-100 justify-content-between m-0">
-									<div>{{ soundfile.name }}</div>
-									<div>
-										<div class="d-inline form-check form-switch m-0 p-0">
-											{%- if soundfile.used -%}
-												<input class="form-check-input used-switch" type="checkbox" uid="{{ soundfile.uid }}" style="position: relative; z-index: 100; height: 1rem; width: 2.5rem; cursor: pointer; background-color: darkseagreen; border: 1px solid grey;" checked>
-											{%- else -%}
-												<input class="form-check-input used-switch" type="checkbox" uid="{{ soundfile.uid }}" style="position: relative; z-index: 100; height: 1rem; width: 2.5rem; cursor: pointer; background-color: lightgrey; border: 1px solid grey;">
-											{%- endif -%}
+								<div class="row">
+									<div class="col-3">
+										<div style="width: 100%; padding-top: 56.25%; position: relative; background-color: lightgrey;">
+											<div class="text-center text-muted" style="position: absolute; left: 0; rigth: 0; top: 0; bottom: 0; font-size: 0.75rem;">
+												<img src="{{ url_for('gallery.get_image', filename=soundfile.uid) }}" alt="" style="max-width: 100%; max-height: 100%; height: 100%;">
+											</div>
 										</div>
-							    	<a class="d-inline-block" href="#collapseDelete{{ soundfile.uid }}" data-bs-toggle="collapse" style="position: relative; z-index: 100; font-size: 1rem; padding: 0.75rem; margin: -0.75rem; color: lightgrey;"><span class="oi oi-x"></span></a>
 									</div>
-								</h5>
+									<div class="col-9">
+										<h5 class="d-flex w-100 justify-content-between m-0">
+											<div>{{ soundfile.name }}</div>
+											<div>
+												<div class="d-inline form-check form-switch m-0 p-0">
+													{%- if soundfile.used -%}
+														<input class="form-check-input used-switch" type="checkbox" uid="{{ soundfile.uid }}" style="position: relative; z-index: 100; height: 1rem; width: 2.5rem; cursor: pointer; background-color: darkseagreen; border: 1px solid grey;" checked>
+													{%- else -%}
+														<input class="form-check-input used-switch" type="checkbox" uid="{{ soundfile.uid }}" style="position: relative; z-index: 100; height: 1rem; width: 2.5rem; cursor: pointer; background-color: lightgrey; border: 1px solid grey;">
+													{%- endif -%}
+												</div>
+									    	<a class="d-inline-block" href="#collapseDelete{{ soundfile.uid }}" data-bs-toggle="collapse" style="position: relative; z-index: 100; font-size: 1rem; padding: 0.75rem; margin: -0.75rem; color: lightgrey;"><span class="oi oi-x"></span></a>
+											</div>
+										</h5>
+									</div>
+								</div>
 								<div class="collapse p-2 text-center" id="collapseDelete{{ soundfile.uid }}" style="background-color: rgb(250, 250, 250); position: relative; z-index: 100;">
 									<p class="mb-1"><small>{{ __('Do you really want to delete this soundfile from catalog?') }}</small></p>
 									<a class="btn btn-sm btn-outline-dark" href="{{ url_for('gallery.delete_soundfile', uid=soundfile.uid) }}">{{ __('Delete') }}</a>
