@@ -217,7 +217,10 @@ class BubbleVideo():
 		if not gif.is_animated or not gif.n_frames > 1:
 			raise ValueError('Source invalid')
 		if frame_start < 0 or frame_start + frame_count > gif.n_frames:
-			raise ValueError('Requested frames out of range')
+			raise ValueError(
+				'Requested frames (%d) out of range (%s)' % \
+					(frame_start + frame_count, gif.n_frames)
+			)
 		image_list = []
 		image_palette = Image.ADAPTIVE
 		for index, frame in enumerate(ImageSequence.Iterator(gif)):

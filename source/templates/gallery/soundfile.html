@@ -33,6 +33,8 @@
 									</select>
 									<label style="color: lightgrey; font-size: 0.9rem;" for="{{ renderer.preset.label.text }}">{{ __('Preset') }}</label>
 								</div>
+								<audio class="d-none" id="audio" preload="metadata"><source src="{{ url_for('gallery.get_audio', filename=audio_filename) }}" type="{{ audio_filetype }}"></audio>
+								<input class="d-none" id="{{ renderer.duration.label.text }}" name="{{ renderer.duration.label.text }}" value=""/>
 								<div class="offset-4 col-4">
 									<label id="rendererSubmitLabel" class="w-100 btn btn-sm btn-outline-dark" onmouseover="" style="cursor: pointer;" for="rendererSubmit" tabindex="0">
 										<span id="applySpinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -117,6 +119,13 @@
 			$("#rendererForm").on("submit", function() {
 				$("#applySpinner").show();
 			});
+			$("rendererSubmitLabel").disabled = true;
+			{%- if renderer -%}
+				$("#audio").on("loadedmetadata", function() {
+					$("#{{ renderer.duration.label.text }}").val($(this)[0].duration);
+					$("rendererSubmitLabel").disabled = false;
+				});
+			{%- endif -%}
 		});
 		function toggleColor(selectElement) {
 			if (selectElement.options.selectedIndex == 0) {

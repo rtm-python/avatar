@@ -93,7 +93,7 @@
 							</div>
 							<div class="m-1 d-flex align-items-center" style="border-radius: 1rem; overflow: hidden; height: 1.5rem;">
 								<audio controls class="col-12" style="z-index: 100; position: relative;">
-									<source src="{{ url_for('gallery.get_audio', filename=soundfile.filename) }}" type="audio/mpeg">
+									<source src="{{ url_for('gallery.get_audio', filename=soundfile.filename) }}" type="{{ soundfile.filetype }}">
 									{{ __('Audio not supported') }}
 								</audio> 
 							</div>

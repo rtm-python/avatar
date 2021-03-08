@@ -61,6 +61,7 @@ class RendererForm(FlaskForm):
 	This is RendererForm class to retrieve form data.
 	"""
 	preset = SelectField('rendererPreset')
+	duration = StringField('rendererDuration')
 	submit = SubmitField('rendererSubmit')
 
 	def __init__(self) -> "RendererForm":
@@ -219,27 +220,33 @@ def update_soundfile(uid: str):
 	"""
 	if not current_user.is_authenticated:
 		return redirect(url_for('base.get_home'))
+	soundfile = SoundfileStore.read(uid)
 	# Handle renderer form
 	is_renderer_post = False
 	renderer = RendererForm()
 	if renderer.validate_on_submit() and \
 			request.form.get(renderer.submit.label.text) is not None:
-		if renderer.preset.data != renderer.preset.choices[0][0]:
-			preset_path = os.path.join(
-				PLUGINS_PATH, '%s.gif' % renderer.preset.data)
-			gif_path = os.path.join(GIFS_PATH, uid)
-			soundfile_seconds = 100
-			frame_start = 0
-			frame_count = int(1000 / 85 * soundfile_seconds) + 10
-			BubbleVideo.copy_gif(
-				preset_path, gif_path, frame_start, frame_count, 85
-			)
-			return redirect(url_for('gallery.get_soundfile_catalog'))
+		if renderer.preset.data != renderer.preset.choices[0][0] and \
+				renderer.duration.data is not None:
+			try:
+				duration = float(renderer.duration.data)
+			except Exception as exc:
+				duration = 0
+			if duration > 0:
+				preset_path = os.path.join(
+					PLUGINS_PATH, '%s.gif' % renderer.preset.data)
+				gif_path = os.path.join(GIFS_PATH, uid)
+				frame_start = 0
+				frame_count = int(1000 / 100 * duration) + 30
+				print(frame_count)
+				BubbleVideo.copy_gif(
+					preset_path, gif_path, frame_start, frame_count, 85
+				)
+				return redirect(url_for('gallery.get_soundfile_catalog'))
 		is_renderer_post = True
 	# Handle soundfile form
 	form = SoundfileForm(
-		SoundfileStore.read(uid) \
-			if request.method == 'GET' or is_renderer_post else None
+		soundfile if request.method == 'GET' or is_renderer_post else None
 	)
 	if form.validate_on_submit() and \
 			request.form.get(form.submit.label.text) is not None:
@@ -258,7 +265,9 @@ def update_soundfile(uid: str):
 	return render_template(
 		'gallery/soundfile.html',
 		form=form,
-		renderer=renderer
+		renderer=renderer,
+		audio_filename=soundfile.filename,
+		audio_filetype=soundfile.filetype
 	)
 
 
