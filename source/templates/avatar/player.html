@@ -64,16 +64,6 @@
 			})
 			socket.on('load_data', function(data, callback) {
 				console.log(data.uid + " loading...");
-<!--				var clone = $('[class*="avatar-sample"]').clone();-->
-<!--				$(clone).attr("id", data.uid);-->
-<!--				$(clone).attr("class", "d-none avatar-item");-->
-<!--				$(clone).children("img").attr("src", data.image.src);-->
-<!--				$(clone).children("audio").children("source").attr("src", data.audio.src);-->
-<!--				$(clone).children("audio").children("type").attr("type", data.audio.type);-->
-<!--				$(clone).appendTo($('[class*="avatar-list"]'));-->
-<!--				$(clone).children("audio").onended = function() {-->
-<!--					$(".avatar-list").fadeTo(500, 0);-->
-<!--				};-->
 				loadData(data);
 				if (callback) callback(data.uid + " loaded");
 				console.log(data.uid + " loading complete");

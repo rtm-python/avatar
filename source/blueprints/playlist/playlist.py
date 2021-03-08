@@ -69,7 +69,7 @@ def get_playlist():
 							'image': {
 								'src': url_for(
 									'playlist.get_image',
-									filename='sample.gif'
+									filename='video2.gif'
 								)
 							},
 							'audio': {
@@ -105,7 +105,7 @@ def get_playlist():
 						'image': {
 							'src': url_for(
 								'playlist.get_image',
-								filename='sample.gif'
+								filename='video2.gif'
 							)
 						},
 						'audio': {
