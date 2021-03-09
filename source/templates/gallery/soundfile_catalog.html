@@ -92,7 +92,7 @@
 								{%- endif -%}
 							</div>
 							<div class="m-1 d-flex align-items-center" style="border-radius: 1rem; overflow: hidden; height: 1.5rem;">
-								<audio controls class="col-12" style="z-index: 100; position: relative;">
+								<audio controls preload="metadata" class="col-12" style="z-index: 100; position: relative;">
 									<source src="{{ url_for('gallery.get_audio', filename=soundfile.filename) }}" type="{{ soundfile.filetype }}">
 									{{ __('Audio not supported') }}
 								</audio> 
@@ -126,7 +126,7 @@
 		var user_tz = moment.tz.guess();
 		var placeholderColor = window.getComputedStyle($("#{{ filter.prefix + filter.name.label.text }}")[0], "::placeholder").getPropertyValue("color");
 		var textColor = window.getComputedStyle($("#{{ filter.prefix + filter.name.label.text }}")[0]).getPropertyValue("color");
-		$(window).on('load', function() {
+		$(function() {
 			// Convert timestamps to local time
 			$('[class*="modified-timestamp"]').each(function() {
 				this.innerText = moment(this.innerText).tz(user_tz).fromNow() + moment(this.innerText).tz(user_tz).format(', HH:mm:ss, DD MMMM YYYY, dddd');

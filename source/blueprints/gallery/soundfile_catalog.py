@@ -11,6 +11,7 @@ import logging
 import os
 
 # Application modules import
+from blueprints.__permission__ import permission_required
 from blueprints.gallery import blueprint
 import blueprints
 from blueprints.__list__ import Pagination
@@ -126,10 +127,10 @@ class SoundfileForm(FlaskForm):
 		"""
 		return not request.form.get(submit_name) is None
 
-
 @blueprint.route('/', methods=('GET', 'POST'))
 @blueprint.route('/soundfile/', methods=('GET', 'POST'))
 @blueprint.route('/soundfile/catalog/', methods=('GET', 'POST'))
+#@permission_required()
 def get_soundfile_catalog():
 	"""
 	Return soundfile catalog page.

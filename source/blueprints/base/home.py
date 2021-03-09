@@ -8,11 +8,14 @@ Blueprint module to handle home routes.
 import logging
 
 # Application modules import
+import blueprints
 from blueprints.base import blueprint
 from blueprints.__init__ import SignedInUser
 from identica import IdenticaManager
 from models.user_store import UserStore
 from models.entity.user import User
+from models.permission_store import PermissionStore
+from models.entity.permission import Permission
 
 # Additional libraries import
 from flask import render_template
@@ -34,6 +37,7 @@ class SignInForm(FlaskForm):
 	This is a SignInForm class to retrieve form data.
 	"""
 	pin = StringField('signInPin')
+	touch = StringField('signInTouch')
 	password = StringField('signInPassword')
 	submit = SubmitField('signInSubmit')
 
@@ -69,13 +73,14 @@ def sign_in():
 			elif verify_data.get('from'):
 				user = UserStore.get_or_create_user(
 					verify_data['from']['id'],
-					verify_data['from']['first_name'],
-					verify_data['from']['last_name'],
-					verify_data['from']['username']
+					verify_data['from'].get('first_name'),
+					verify_data['from'].get('last_name'),
+					verify_data['from'].get('username')
 				)
 				login_user(SignedInUser(user), remember=True)
 				logging.debug('Sign in as user %s (%s)' % \
 					(' '.join([user.first_name, user.last_name]), user.from_id))
+				blueprints.set_value('mobile', form.touch.data == 'true')
 				return { 'redirect': url_for('base.get_home') }
 			return { 'wait': True }
 	with open('source/static/face.txt', 'r') as file:
@@ -109,13 +114,14 @@ def get_identica(url_token):
 		if verify_data is not None and verify_data.get('from'):
 			user = UserStore.get_or_create_user(
 				verify_data['from']['id'],
-				verify_data['from']['first_name'],
-				verify_data['from']['last_name'],
-				verify_data['from']['username']
+				verify_data['from'].get('first_name'),
+				verify_data['from'].get('last_name'),
+				verify_data['from'].get('username')
 			)
 			login_user(SignedInUser(user), remember=True)
 			logging.debug('Sign in as user %s (%s)' % \
 				(' '.join([user.first_name, user.last_name]), user.from_id))
+			blueprints.set_value('mobile', request.form.get('touch') == 'true')
 		return redirect(url_for('base.get_home'))
 	with open('source/static/face.txt', 'r') as file:
 		ascii_img = file.read().split('\n')

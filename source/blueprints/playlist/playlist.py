@@ -28,7 +28,6 @@ from flask_login import current_user
 
 
 @blueprint.route('/', methods=('GET', 'POST'))
-@blueprint.route('/playlist/', methods=('GET', 'POST'))
 def get_playlist():
 	"""
 	Return playlist page.
@@ -128,8 +127,6 @@ def get_playlist():
 	soundfile_list = SoundfileStore.read_list(
 		0, None, None, None, True
 	)
-	if blueprints.get_value('mobile', bool, False):
-		blueprints.set_value('mobile', True)
 	return render_template(
 		'playlist/playlist.html',
 		soundfile_list=soundfile_list,

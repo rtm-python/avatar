@@ -50,7 +50,7 @@
 											{%- endif -%}
 										</div>
 										<div class="m-1 d-flex align-items-center" style="border-radius: 1rem; overflow: hidden; height: 1.5rem;">
-											<audio controls class="col-12" style="z-index: 100; position: relative;">
+											<audio controls preload="metadata" class="col-12" style="z-index: 100; position: relative;">
 												<source src="{{ url_for('gallery.get_audio', filename=soundfile.filename) }}" type="audio/mpeg">
 												{{ __('Audio not supported') }}
 											</audio> 
@@ -75,62 +75,56 @@
 			<small class="text-muted">{{ __('Soundfiles Not Found...') }}</small>
 		</div>
 	{%- endif -%}
-	<div id="locker" style="position: fixed; top: 0; left: 0; bottom: 0; right: 0; background-color: rgba(75, 75, 75, 0.50); z-index: 2000;"></div>
+	<div id="locker" class="d-none" style="position: fixed; top: 0; left: 0; bottom: 0; right: 0; background-color: rgba(75, 75, 75, 0.50); z-index: 2000;"></div>
 {%- endblock -%}
 {%- block body_script-%}
 	<script type="text/javascript">
 		var user_tz = moment.tz.guess();
-		$(window).on('load', function() {
+		$(function() {
+			$('[href="javascript:reorderSoundfiles();"]').fadeTo(0, 0.25);
+			$("#locker").fadeTo(0, 0.25);
+			$("#locker").hide();
+			{%- if not mobile -%}
+				// Sortable headlines (jquery-ui)
+				$("#sortable").sortable({
+					placeholder: "content-sortable-highlight"
+				});
+				$("#sortable").on("sortchange", function() {
+					$('[href="javascript:reorderSoundfiles();"]').fadeTo(2000, 1);
+				});
+				$("#sortable").disableSelection();
+			{%- endif -%}
 			// Convert timestamps to local time
 			$('[class*="modified-timestamp"]').each(function() {
 				this.innerText = moment(this.innerText).tz(user_tz).fromNow() + moment(this.innerText).tz(user_tz).format(', HH:mm:ss, DD MMMM YYYY, dddd');
 			});
-			// Sortable headlines (jquery-ui)
-			$('[href="javascript:reorderSoundfiles();"]').fadeTo(0, 0.25);
-			$("#locker").fadeTo(0, 0.25);
-			$("#locker").hide();
-			if ($(window).width() >= 1024) {
-				{%- if mobile -%}
-					window.location.href = "{{ url_for('playlist.get_playlist', mobile=False) }}";
-				{%- else -%}
-					$("#sortable").sortable({
-						placeholder: "content-sortable-highlight"
-					});
-					$("#sortable").on("sortchange", function() {
-						$('[href="javascript:reorderSoundfiles();"]').fadeTo(2000, 1);
-					});
-					$("#sortable").disableSelection();
-				{%- endif -%}
-			} else {
-				{%- if not mobile -%}
-					window.location.href = "{{ url_for('playlist.get_playlist', mobile=True) }}";
-				{%- endif -%}
-			}
 		});
-		function reorderSoundfiles() {
-			if ($('[href="javascript:reorderSoundfiles();"]').css("opacity") == 1) {
-				$("#locker").show();
-				$("#locker").fadeTo(1000, 1);
-				var reorderedList = [];
-				$('[class*="soundfile-uid"]').each(function() {
-					reorderedList.push($(this).attr("id"));
-				});
-				$.ajax({
-					type: "post",
-					async: false,
-					url: "",
-					data: JSON.stringify({"reorderedList":reorderedList}, null),
-			    contentType: "application/json;charset=UTF-8",
-					success: function (data, textStatus, request) {
-						if (data.redirect) {
-							window.location.href = data.redirect;
-						} else {
-							location.reload();
+		{%- if not mobile -%}
+			function reorderSoundfiles() {
+				if ($('[href="javascript:reorderSoundfiles();"]').css("opacity") == 1) {
+					$("#locker").show();
+					$("#locker").fadeTo(1000, 1);
+					var reorderedList = [];
+					$('[class*="soundfile-uid"]').each(function() {
+						reorderedList.push($(this).attr("id"));
+					});
+					$.ajax({
+						type: "post",
+						async: false,
+						url: "",
+						data: JSON.stringify({"reorderedList":reorderedList}, null),
+				    contentType: "application/json;charset=UTF-8",
+						success: function (data, textStatus, request) {
+							if (data.redirect) {
+								window.location.href = data.redirect;
+							} else {
+								location.reload();
+							}
 						}
-					}
-				});
-			}
-		};
+					});
+				}
+			};
+		{%- endif -%}
 		function preloadSoundfiles() {
 			$("#locker").show();
 			$("#locker").fadeTo(1000, 1);

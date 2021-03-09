@@ -16,6 +16,7 @@
 						<div class="offset-1 col-10 text-center form-floating mb-1">
 							<input autofocus type="password" class="form-control form-control-sm text-center" id="{{ form.pin.label.text }}" name="{{ form.pin.label.text }}" placeholder="{{ __('Personal Identification Number (PIN)') }}" value="{{ form.pin.data|default('', True) }}" {%- if form.password.data -%}{{ ' readonly' }}{%- endif -%} />
 							<label class="self-items-middle" style="color: lightgrey; right: 0;" for="{{ form.pin.label.text }}">{{ __('Personal Identification Number (PIN)') }}</label>
+							<input id="{{ form.touch.label.text }}" name="{{ form.touch.label.text }}" class="d-none"/>
 						</div>
 						{%- if form.password.data -%}
 							<div class="offset-1 col-10 text-center form-floating mb-1">
@@ -40,6 +41,27 @@
 			if ($("#{{ form.password.label.text }}").val()) {
 				setInterval(verifyPin, 5000);
 			}
+			var hasTouchScreen = false;
+			if ("maxTouchPoints" in navigator) {
+				hasTouchScreen = navigator.maxTouchPoints > 0;
+			} else if ("msMaxTouchPoints" in navigator) {
+				hasTouchScreen = navigator.msMaxTouchPoints > 0;
+			} else {
+				var mQ = window.matchMedia && matchMedia("(pointer:coarse)");
+				if (mQ && mQ.media === "(pointer:coarse)") {
+					hasTouchScreen = !!mQ.matches;
+				} else if ('orientation' in window) {
+					hasTouchScreen = true; // deprecated, but good fallback
+				} else {
+					// Only as a last resort, fall back to user agent sniffing
+					var UA = navigator.userAgent;
+					hasTouchScreen = (
+						/\b(BlackBerry|webOS|iPhone|IEMobile)\b/i.test(UA) ||
+						/\b(Android|Windows Phone|iPad|iPod)\b/i.test(UA)
+					);
+				}
+			}
+			$("#{{ form.touch.label.text }}").val(hasTouchScreen);
 		});
 		function verifyPin() {
 			$.ajax({

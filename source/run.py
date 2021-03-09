@@ -16,6 +16,7 @@ import blueprints
 from config import CONFIG
 from models import database
 from identica import IdenticaManager
+from blueprints.__permission__ import configure_permissions
 
 application = blueprints.application
 socketio = blueprints.socketio
@@ -34,12 +35,24 @@ def run_socketio():
 	"""
 	Run SocketIO server.
 	"""
-	socketio.run(application)
+	socketio.run(
+		application,
+		host=CONFIG['web']['host'],
+		port=CONFIG['web']['port']
+	)
+
+
+@application.cli.command('run-permissions')
+def run_permissions():
+	"""
+	Run permissions configure.
+	"""
+	configure_permissions()
 
 
 # Run application on executing module
 if __name__ == '__main__':
-#	application.run(threaded=True)
+##	application.run(threaded=True)
 	socketio.run(
 		application,
 		host=CONFIG['web']['host'],
