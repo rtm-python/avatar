@@ -9,6 +9,7 @@ import logging
 import json
 
 # Application modules import
+from blueprints.__permission__ import permission_required
 import blueprints
 from blueprints import socketio
 from blueprints.avatar import blueprint
@@ -29,6 +30,7 @@ from flask_socketio import disconnect
 
 
 @blueprint.route('/player/', methods=('GET', 'POST'))
+@permission_required
 def get_player():
 	"""
 	Return player page.
@@ -48,6 +50,7 @@ def get_player():
 
 
 @socketio.on('connect')
+@permission_required
 def handle_connect():
 	"""
 	Create or update avatar with sid_data for connected user.
@@ -80,6 +83,7 @@ def handle_connect():
 
 
 @socketio.on('disconnect')
+@permission_required
 def handle_disconnect():
 	"""
 	Remove sid from avatar for disconnected user.
@@ -106,6 +110,7 @@ def handle_disconnect():
 
 
 @socketio.on('avatar_connected')
+@permission_required
 def handle_avatar_connected(data):
 	logging.debug(
 		'%s [Avatar: %s] connected with loaded data: %s' % (

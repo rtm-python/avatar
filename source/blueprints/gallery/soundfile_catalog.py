@@ -130,7 +130,7 @@ class SoundfileForm(FlaskForm):
 @blueprint.route('/', methods=('GET', 'POST'))
 @blueprint.route('/soundfile/', methods=('GET', 'POST'))
 @blueprint.route('/soundfile/catalog/', methods=('GET', 'POST'))
-#@permission_required()
+@permission_required
 def get_soundfile_catalog():
 	"""
 	Return soundfile catalog page.
@@ -188,6 +188,7 @@ def get_soundfile_catalog():
 
 
 @blueprint.route('/soundfile/catalog/upload/', methods=('GET', 'POST'))
+@permission_required
 def upload_soundfile():
 	"""
 	Return soundfile upload page.
@@ -215,6 +216,7 @@ def upload_soundfile():
 
 
 @blueprint.route('/soundfile/catalog/update/<uid>/', methods=('GET', 'POST'))
+@permission_required
 def update_soundfile(uid: str):
 	"""
 	Return soundfile update page.
@@ -273,6 +275,7 @@ def update_soundfile(uid: str):
 
 
 @blueprint.route('/soundfile/catalog/refresh/', methods=('GET',))
+@permission_required
 def refresh_soundfile_catalog():
 	"""
 	Refresh soundfile catalog (uncheck used) and return redirect.
@@ -284,6 +287,7 @@ def refresh_soundfile_catalog():
 
 
 @blueprint.route('/soundfile/catalog/delete/<uid>/', methods=('GET',))
+@permission_required
 def delete_soundfile(uid: str):
 	"""
 	Delete soundfile and return redirect page.
@@ -297,6 +301,7 @@ def delete_soundfile(uid: str):
 
 
 @blueprint.route('/soundfile/catalog/audio/<filename>/', methods=('GET',))
+@permission_required
 def get_audio(filename: str):
 	"""
 	Return audio file.
@@ -307,6 +312,7 @@ def get_audio(filename: str):
 
 
 @blueprint.route('/soundfile/catalog/image/<filename>/', methods=('GET',))
+@permission_required
 def get_image(filename: str):
 	"""
 	Return image file.

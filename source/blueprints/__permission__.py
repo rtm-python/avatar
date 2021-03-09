@@ -55,45 +55,30 @@ def del_permissions(user_id: int, permissions: list) -> None:
 			current_permissions.remove(value)
 
 
-def permission_required():
+def permission_required(function):
 	"""
 	User permission to access verification decorator.
 	"""
-	def inner(function):
+	@wraps(function)
+	def wrapper(*args, **kwargs):
+		"""
+		Wrapper function to verify user permission.
+		"""
+		if not current_user.is_authenticated or \
+				current_user.user is None:
+			logging.debug('Redirect unauthorized (anonymous) user')
+			return redirect(url_for('base.get_home'))
+		permission_value = '%s.%s' % (
+			function.__module__,
+			function.__name__
+		)
+		permissions = PermissionStore.read_list(
+			0, None, current_user.user.id, permission_value)
+		if len(permissions) == 0:
+			return redirect(url_for('base.get_home'))
+		return function(*args, **kwargs)
 
-		@wraps(function)
-		def wrapper(*args, **kwargs):
-			"""
-			Wrapper function to verify user permission.
-			"""
-			if not current_user.is_authenticated or \
-					current_user.user is None:
-				logging.debug('Redirect unauthorized (anonymous) user')
-				return redirect(url_for('base.get_home'))
-			permission_value = '%s.%s' % (
-				function.__module__,
-				function.__name__
-			)
-			print(permission_value)
-			permissions = [
-				permission.value \
-					for permission in PermissionStore.read_list(
-						0, None, current_user.user.id, None
-					)
-			]
-			print(permissions)
-			print(
-				permission_value in permissions
-			)
-			permissions = PermissionStore.read_list(
-				0, None, current_user.user.id, permission_value)
-			if len(permissions) == 0:
-				return redirect(url_for('base.get_home'))
-			return function(*args, **kwargs)
-
-		return wrapper
-
-	return inner
+	return wrapper
 
 
 def get_choice(choices: list) -> int:

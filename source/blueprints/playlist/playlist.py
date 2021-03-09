@@ -11,6 +11,7 @@ import logging
 import json
 
 # Application modules import
+from blueprints.__permission__ import permission_required
 import blueprints
 from blueprints.playlist import blueprint
 from models.avatar_store import AvatarStore
@@ -28,6 +29,7 @@ from flask_login import current_user
 
 
 @blueprint.route('/', methods=('GET', 'POST'))
+@permission_required
 def get_playlist():
 	"""
 	Return playlist page.
