@@ -2,7 +2,6 @@ from io import BytesIO
 from PIL import Image
 from PIL import ImageSequence
 import numpy
-import cv2
 from random import randint
 
 SAVE_KWARGS = {
@@ -48,6 +47,7 @@ class CubeFace():
 	def write_capture(output_name: str, input, background_filename: str,
 										cube_size: int, cube_color: tuple, pixel_size: int,
 										image_count: int = 1000):
+		import cv2
 		capture = cv2.VideoCapture(input)
 		if not capture.isOpened():
 			raise ValueError('Input source unavailable (%s)' % capture)
@@ -97,6 +97,7 @@ class CubeFace():
 	@staticmethod
 	def show_capture(input, background_filename: str,
 									 cube_size: int, cube_color: tuple, pixel_size: int):
+		import cv2
 		capture = cv2.VideoCapture(input)
 		if not capture.isOpened():
 			raise ValueError('Input source unavailable (%s)' % capture)
@@ -138,6 +139,7 @@ class CubeFace():
 	@staticmethod
 	def draw_face(frame, cube_size: int, cube_color: tuple,
 								pixel_size: int, pixel_weight: int, else_color: tuple):
+		import cv2
 		face = numpy.full(
 			(cube_size, cube_size, 3),
 			(0, 0, 0), dtype=numpy.uint8
@@ -175,6 +177,7 @@ class CubeFace():
 	def write_background(output_name: str, cube_size: int, cube_color: tuple,
 											 pixel_size: int, border_size: int, do_cube: bool,
 											 image_count: int = 1000):
+		import cv2
 		image_list = []
 		frame = numpy.full(
 			(cube_size, cube_size, 3),
@@ -202,6 +205,7 @@ class CubeFace():
 	@staticmethod
 	def show_background(cube_size: int, cube_color: tuple,
 											pixel_size: int, border_size: int, do_cube: bool):
+		import cv2
 		frame = numpy.full(
 			(cube_size, cube_size, 3),
 			cube_color, dtype=numpy.uint8
@@ -221,6 +225,7 @@ class CubeFace():
 	@staticmethod
 	def draw_background(frame, cube_size: int, cube_color: tuple,
 											pixel_size: int, border_size: int):
+		import cv2
 		light = 0
 		light_limit = 25
 		for x in range(0, cube_size, pixel_size):
@@ -253,6 +258,7 @@ class CubeFace():
 
 	@staticmethod
 	def cube_background(frame, cube_size: int):
+		import cv2
 		# Source rectangle background
 		tl0 = [0, 0]
 		tr0 = [cube_size - 1, 0]
