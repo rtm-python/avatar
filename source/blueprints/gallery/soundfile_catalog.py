@@ -24,7 +24,7 @@ from config import CONFIG
 from config import GIFS_PATH
 from config import PLUGINS_PATH
 from config import define_list
-from plugins.bubble import BubbleVideo
+from plugins.cube import CubeFace
 
 # Additional libraries import
 from flask import render_template
@@ -238,13 +238,9 @@ def update_soundfile(uid: str):
 			if duration > 0:
 				preset_path = os.path.join(
 					PLUGINS_PATH, '%s.gif' % renderer.preset.data)
-				gif_path = os.path.join(GIFS_PATH, uid)
-				frame_start = 0
-				frame_count = int(1000 / 100 * duration) + 30
-				print(frame_count)
-				BubbleVideo.copy_gif(
-					preset_path, gif_path, frame_start, frame_count, 85
-				)
+				output_path = os.path.join(GIFS_PATH, uid)
+				frame_count = int(1000 / 120 * duration)
+				CubeFace.copy(preset_path, output_path, frame_count, 120)
 				return redirect(url_for('gallery.get_soundfile_catalog'))
 		is_renderer_post = True
 	# Handle soundfile form
