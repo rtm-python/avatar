@@ -29,6 +29,8 @@ class CubeFace():
 				'Requested frames (%d) out of range (%s)' % \
 					(frame_count, gif.n_frames)
 			)
+		if frame_count > 250:
+			frame_count = 250
 		frame_start = randint(0, 1000 - frame_count)
 		image_list = []
 		for index, frame in enumerate(ImageSequence.Iterator(gif)):
