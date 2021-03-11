@@ -1,6 +1,5 @@
 from io import BytesIO
 from PIL import Image
-from PIL import ImageSequence
 import numpy
 import time
 from random import randint
@@ -9,8 +8,9 @@ SAVE_KWARGS = {
 #	'loop': 0,
 	'save_all': True,
 	'optimize': True,
-	'duration': 75
+	'duration': 125
 }
+COPY_FRAME_LIMIT = 100
 
 
 class CubeFace():
@@ -21,30 +21,22 @@ class CubeFace():
 	@staticmethod
 	def copy(face_filename: str, output_path: str,
 					 frame_count: int, frame_duration: int) -> None:
-		gif = Image.open(face_filename)
-		if not gif.is_animated or not gif.n_frames > 1:
-			raise ValueError('Source invalid')
-		if frame_count > 250: # Prevent loading huge amount of frames
-			frame_count = 250
-		if frame_count > gif.n_frames:
-			raise ValueError(
-				'Requested frames (%d) out of range (%s)' % \
-					(frame_count, gif.n_frames)
-			)
-		wait_count = 50
-		wait_index = 0
-		frame_start = randint(0, 1000 - frame_count)
-		image_list = []
-		print('Extracting...')
-		for index, frame in enumerate(ImageSequence.Iterator(gif)):
-			if index >= frame_start + frame_count:
-				break
-			if index >= frame_start:
-				image_list += [frame.copy()]
-			if wait_index >= wait_count:
-				time.sleep(1)
-				wait_index = 0
-		time.sleep(1)
+		with Image.open(face_filename) as gif:
+			if not gif.is_animated or not gif.n_frames > 1:
+				raise ValueError('Source invalid')
+			if frame_count > COPY_FRAME_LIMIT:
+				frame_count = COPY_FRAME_LIMIT
+			if frame_count > gif.n_frames:
+				raise ValueError(
+					'Requested frames (%d) out of range (%s)' % \
+						(frame_count, gif.n_frames)
+				)
+			frame_start = randint(0, gif.n_frames - frame_count)
+			image_list = []
+			print('Ready to extract %d frames' % frame_count)
+			for frame_index in range(frame_start, frame_start + frame_count):
+				gif.seek(frame_index)
+				image_list += [gif.copy()]
 		print('Ready to write %d frames' % len(image_list))
 		image_list[0].save(
 			output_path, format='GIF', loop=0,
@@ -192,6 +184,7 @@ class CubeFace():
 			(cube_size, cube_size, 3),
 			cube_color, dtype=numpy.uint8
 		)
+		last_frame = None
 		while True:
 			frame = CubeFace.draw_background(
 				frame, cube_size, cube_color, pixel_size, border_size
@@ -199,10 +192,18 @@ class CubeFace():
 			if do_cube:
 				cube_frame = CubeFace.cube_background(frame, cube_size)
 				frame = cv2.addWeighted(frame, 0.5, cube_frame, 0.7, 0.0)
+				if last_frame is not None:
+					sub_frame = cv2.addWeighted(frame, 0.5, last_frame, 0.6, 0.0)
+					image = Image.fromarray(cv2.cvtColor(sub_frame, cv2.COLOR_BGR2RGB))
+					image_list += [image.convert(mode='P', palette=Image.ADAPTIVE)]
+					cv2.imshow(output_name, sub_frame)
+					if cv2.waitKey(10) == 27 or len(image_list) >= image_count:
+						break
+				last_frame = cube_frame
 			image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 			image_list += [image.convert(mode='P', palette=Image.ADAPTIVE)]
 			cv2.imshow(output_name, frame)
-			if cv2.waitKey(10) == 27 or len(image_list) == image_count:
+			if cv2.waitKey(10) == 27 or len(image_list) >= image_count:
 				break
 		cv2.destroyAllWindows()
 		image_list[0].save(
@@ -219,6 +220,7 @@ class CubeFace():
 			(cube_size, cube_size, 3),
 			cube_color, dtype=numpy.uint8
 		)
+		last_frame = None
 		while True:
 			frame = CubeFace.draw_background(
 				frame, cube_size, cube_color, pixel_size, border_size
@@ -226,8 +228,14 @@ class CubeFace():
 			if do_cube:
 				cube_frame = CubeFace.cube_background(frame, cube_size)
 				frame = cv2.addWeighted(frame, 0.5, cube_frame, 0.7, 0.0)
+				if last_frame is not None:
+					sub_frame = cv2.addWeighted(frame, 0.5, last_frame, 0.6, 0.0)
+					cv2.imshow('background', sub_frame)
+					if cv2.waitKey(75) == 27:
+						break
+				last_frame = cube_frame
 			cv2.imshow('background', frame)
-			if cv2.waitKey(10) == 27:
+			if cv2.waitKey(75) == 27:
 				break
 		cv2.destroyAllWindows()
 
@@ -317,9 +325,9 @@ if __name__ == '__main__':
 	pixel_size = 18
 	border_size = 3
 	cube_size = pixel_size * 36
-	choice = 3
+	choice = 0
 	if choice == 0:
-		CubeFace
+		CubeFace.copy('1000-face.gif', '100-face.gif', 100, 150)
 	elif choice == 1:
 		CubeFace.show_background(
 			cube_size, dark_titan_color,
@@ -331,7 +339,7 @@ if __name__ == '__main__':
 			'background',
 			cube_size, dark_titan_color,
 			pixel_size, border_size,
-			do_cube=True
+			do_cube=True, image_count=100
 		)
 	elif choice == 3:
 		CubeFace.show_capture(
@@ -341,5 +349,5 @@ if __name__ == '__main__':
 	elif choice == 4:
 		CubeFace.write_capture(
 			'face', 0, '1000-background.gif',
-			cube_size, dark_titan_color, pixel_size // 2
+			cube_size, dark_titan_color, pixel_size // 2, image_count=100
 		)
