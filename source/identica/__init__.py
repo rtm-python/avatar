@@ -251,7 +251,7 @@ class IdenticaManager():
 				message['chat']['id'],
 				language, KEYBOARDS[0], False
 			)
-		else:
+		elif '\n' in message['text']:
 			pseudo_command_title, marker = message['text'].split('\n')
 			if marker not in [
 						'[ %s ]' % self.config['name'],
@@ -562,6 +562,14 @@ class IdenticaManager():
 
 
 if __name__ == '__main__':
+	import cProfile, pstats, io
+	pr = cProfile.Profile()
+	pr.enable()
 	im = IdenticaManager()
 	im.set_commands()
 	im.run()
+	pr.disable()
+	s = io.StringIO()
+	ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
+	ps.print_stats()
+	print(s.getvalue())

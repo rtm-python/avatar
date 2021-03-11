@@ -13,6 +13,7 @@ from blueprints.__permission__ import permission_required
 import blueprints
 from blueprints import socketio
 from blueprints.avatar import blueprint
+from models.user_store import UserStore
 from models.avatar_store import AvatarStore
 from models.soundfile_store import SoundfileStore
 from models.entity.avatar import Avatar
@@ -50,20 +51,24 @@ def get_player():
 
 
 @socketio.on('connect')
-@permission_required
 def handle_connect():
 	"""
 	Create or update avatar with sid_data for connected user.
 	"""
-	if not blueprints.socketio_authenticated():
+	uid = request.headers.get('Uid')
+	if uid is None:
+		disconnect()
+		return
+	user = UserStore.read(uid)
+	if user is None:
 		disconnect()
 		return
 	avatar_list = AvatarStore.read_list(
-		1, 0, current_user.user.id, None, None
+		1, 0, user.id, None, None
 	)
 	if len(avatar_list) == 0:
 		avatar = AvatarStore.create(
-			current_user.user.id,
+			user.id,
 			json.dumps({'sid_list': [request.sid]})
 		)
 	else:
@@ -76,22 +81,27 @@ def handle_connect():
 		)
 	logging.debug(
 		'Avatar connected: %s (%s)' % (
-			' '.join([current_user.user.first_name, current_user.user.last_name]),
+			' '.join([user.first_name, user.last_name]),
 			request.sid
 		)
 	)
 
 
 @socketio.on('disconnect')
-@permission_required
 def handle_disconnect():
 	"""
 	Remove sid from avatar for disconnected user.
 	"""
-	if not blueprints.socketio_authenticated():
+	uid = request.headers.get('Uid')
+	if uid is None:
+		disconnect()
+		return
+	user = UserStore.read(uid)
+	if user is None:
+		disconnect()
 		return
 	avatar_list = AvatarStore.read_list(
-		1, None, current_user.user.id, None, None
+		1, None, user.id, None, None
 	)
 	if len(avatar_list) > 0:
 		avatar = avatar_list[0]
@@ -103,20 +113,27 @@ def handle_disconnect():
 		)
 	logging.debug(
 		'Avatar disconnected: %s (%s)' % (
-			' '.join([current_user.user.first_name, current_user.user.last_name]),
+			' '.join([user.first_name, user.last_name]),
 			request.sid
 		)
 	)
 
 
 @socketio.on('avatar_connected')
-@permission_required
 def handle_avatar_connected(data):
+	uid = request.headers.get('Uid')
+	if uid is None:
+		disconnect()
+		return
+	user = UserStore.read(uid)
+	if user is None:
+		disconnect()
+		return
 	logging.debug(
 		'%s [Avatar: %s] connected with loaded data: %s' % (
 			' '.join([
-				current_user.user.first_name,
-				current_user.user.last_name
+				user.first_name,
+				user.last_name
 			]) if blueprints.socketio_authenticated() else 'Anonymous User',
 			request.sid, data
 		)

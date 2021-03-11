@@ -136,10 +136,7 @@ def configure_permissions():
 				'6: blueprints.gallery.soundfile_catalog.get_audio',
 				'7: blueprints.gallery.soundfile_catalog.get_image',
 				'8: blueprints.playlist.playlist.get_playlist',
-				'9: blueprints.avatar.player.get_player',
-				'10: blueprints.avatar.player.handle_connect',
-				'11: blueprints.avatar.player.handle_disconnect',
-				'12: blueprints.avatar.player.handle_avatar_connected'
+				'9: blueprints.avatar.player.get_player'
 			]
 			choice = get_choice(choices)
 		elif level == 3:

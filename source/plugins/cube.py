@@ -325,7 +325,7 @@ if __name__ == '__main__':
 	pixel_size = 18
 	border_size = 3
 	cube_size = pixel_size * 36
-	choice = 0
+	choice = 2
 	if choice == 0:
 		CubeFace.copy('1000-face.gif', '100-face.gif', 100, 150)
 	elif choice == 1:
@@ -339,7 +339,7 @@ if __name__ == '__main__':
 			'background',
 			cube_size, dark_titan_color,
 			pixel_size, border_size,
-			do_cube=True, image_count=100
+			do_cube=True, image_count=25
 		)
 	elif choice == 3:
 		CubeFace.show_capture(
