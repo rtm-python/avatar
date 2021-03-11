@@ -2,6 +2,7 @@ from io import BytesIO
 from PIL import Image
 from PIL import ImageSequence
 import numpy
+import time
 from random import randint
 
 SAVE_KWARGS = {
@@ -23,8 +24,8 @@ class CubeFace():
 		gif = Image.open(face_filename)
 		if not gif.is_animated or not gif.n_frames > 1:
 			raise ValueError('Source invalid')
-		if frame_count > 100: # Prevent loading huge amount of frames
-			frame_count = 100
+		if frame_count > 250: # Prevent loading huge amount of frames
+			frame_count = 250
 		if frame_count > gif.n_frames:
 			raise ValueError(
 				'Requested frames (%d) out of range (%s)' % \
@@ -37,6 +38,7 @@ class CubeFace():
 				break
 			if index >= frame_start:
 				image_list += [frame.copy()]
+		time.sleep(1)
 		image_list[0].save(
 			output_path, format='GIF', loop=0,
 			append_images=image_list[1:], palette=Image.ADAPTIVE, **SAVE_KWARGS
