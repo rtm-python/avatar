@@ -119,13 +119,7 @@ def load_user(user_id):
 
 
 # Initiate SocketIO object
-socketio.init_app(
-	application,
-	cors_allowed_origins=[
-		'http://127.0.0.1:5000',
-		'http://localhost:5000'
-	]
-)
+socketio.init_app(application, cors_allowed_origins='*')
 
 
 def socketio_authenticated() -> bool:
