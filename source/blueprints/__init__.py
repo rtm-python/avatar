@@ -42,7 +42,7 @@ application.config['MAX_CONTENT_LENGTH'] = CONFIG['web']['max_content_length']
 #	'%s:%d' % (CONFIG['web']['host'], CONFIG['web']['port'])
 
 # Create SocketIO object
-socketio = SocketIO()
+socketio = SocketIO(cors_allowed_origins='http://127.0.0.1:5000')
 
 
 class SignedInUser(UserMixin):
@@ -119,7 +119,13 @@ def load_user(user_id):
 
 
 # Initiate SocketIO object
-socketio.init_app(application, cors_allowed_origins='*')
+socketio.init_app(
+	application,
+	cors_allowed_origins=[
+		'http://127.0.0.1:5000',
+		'http://localhost:5000'
+	]
+)
 
 
 def socketio_authenticated() -> bool:
