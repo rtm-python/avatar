@@ -31,14 +31,21 @@ class CubeFace():
 				'Requested frames (%d) out of range (%s)' % \
 					(frame_count, gif.n_frames)
 			)
+		wait_count = 50
+		wait_index = 0
 		frame_start = randint(0, 1000 - frame_count)
 		image_list = []
+		print('Extracting...')
 		for index, frame in enumerate(ImageSequence.Iterator(gif)):
 			if index >= frame_start + frame_count:
 				break
 			if index >= frame_start:
 				image_list += [frame.copy()]
+			if wait_index >= wait_count:
+				time.sleep(1)
+				wait_index = 0
 		time.sleep(1)
+		print('Ready to write %d frames' % len(image_list))
 		image_list[0].save(
 			output_path, format='GIF', loop=0,
 			append_images=image_list[1:], palette=Image.ADAPTIVE, **SAVE_KWARGS
