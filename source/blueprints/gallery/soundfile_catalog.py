@@ -239,8 +239,8 @@ def update_soundfile(uid: str):
 				preset_path = os.path.join(
 					PLUGINS_PATH, '%s.gif' % renderer.preset.data)
 				output_path = os.path.join(GIFS_PATH, uid)
-				frame_count = int(1000 / 120 * duration)
-				CubeFace.copy(preset_path, output_path, frame_count, 120)
+				frame_count = int(1000 / 150 * duration)
+				CubeFace.copy(preset_path, output_path, frame_count, 150)
 				return redirect(url_for('gallery.get_soundfile_catalog'))
 		is_renderer_post = True
 	# Handle soundfile form
