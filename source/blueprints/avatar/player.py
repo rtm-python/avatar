@@ -55,7 +55,7 @@ def handle_connect():
 	"""
 	Create or update avatar with sid_data for connected user.
 	"""
-	uid = request.headers.get('Uid')
+	uid = request.headers.get('uid') or request.headers.get('Uid')
 	if uid is None:
 		disconnect()
 		return
@@ -92,7 +92,7 @@ def handle_disconnect():
 	"""
 	Remove sid from avatar for disconnected user.
 	"""
-	uid = request.headers.get('Uid')
+	uid = request.headers.get('uid') or request.headers.get('Uid')
 	if uid is None:
 		disconnect()
 		return
@@ -121,7 +121,7 @@ def handle_disconnect():
 
 @socketio.on('avatar_connected')
 def handle_avatar_connected(data):
-	uid = request.headers.get('Uid')
+	uid = request.headers.get('uid') or request.headers.get('Uid')
 	if uid is None:
 		disconnect()
 		return

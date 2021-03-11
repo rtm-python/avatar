@@ -36,10 +36,6 @@
 			var socket = io(opts={
 				"extraHeaders": {
 					"uid": "{{ current_user.user.uid }}"
-				},
-				"cors": {
-					"origin": "*",
-					"methods": ["GET", "POST"]						
 				} 
 			});
 			socket.on('connect', function() {
