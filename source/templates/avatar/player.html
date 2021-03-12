@@ -33,11 +33,13 @@
 			// Prepare avatar page
 			$(".avatar-list").fadeTo(0, 0);
 			// SocketIO initiate
-			var socket = io(opts={
-				"extraHeaders": {
-					"uid": "{{ current_user.user.uid }}"
-				} 
-			});
+			var socket = io(
+				opts={
+					"extraHeaders": {
+						"uid": "{{ current_user.user.uid }}"
+					} 
+				}
+			);
 			socket.on('connect', function() {
 				var avatar_list = [];
 				$('[class*="avatar-item"]').each(function() {

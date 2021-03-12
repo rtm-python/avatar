@@ -30,6 +30,7 @@ from flask_login import UserMixin
 from flask_login import AnonymousUserMixin
 from flask_login import current_user
 from flask_socketio import SocketIO
+from flask_cors import CORS
 
 # Initiate Flask object
 application = Flask(
@@ -38,11 +39,10 @@ application = Flask(
 )
 application.config['SECRET_KEY'] = CONFIG['web']['secret_key']
 application.config['MAX_CONTENT_LENGTH'] = CONFIG['web']['max_content_length']
-#application.config['SERVER_NAME'] = \
-#	'%s:%d' % (CONFIG['web']['host'], CONFIG['web']['port'])
+CORS(application, resources={r'/socket.io/*': {'origins': '*'}})
 
 # Create SocketIO object
-socketio = SocketIO(cors_allowed_origins='http://127.0.0.1:5000')
+socketio = SocketIO()
 
 
 class SignedInUser(UserMixin):
@@ -120,6 +120,9 @@ def load_user(user_id):
 
 # Initiate SocketIO object
 socketio.init_app(application, cors_allowed_origins='*')
+if CONFIG.get('logging') and CONFIG['logging'].get('level'):
+	logging.getLogger('socketio').setLevel(CONFIG['logging']['level'])
+	logging.getLogger('engineio').setLevel(CONFIG['logging']['level'])
 
 
 def socketio_authenticated() -> bool:
