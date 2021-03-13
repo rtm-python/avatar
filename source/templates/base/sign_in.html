@@ -23,12 +23,15 @@
 								<input type="text" class="form-control form-control-sm text-center" id="{{ form.password.label.text }}" name="{{ form.password.label.text }}" placeholder="{{ __('Password') }}" value="{{ form.password.data|default('', True) }}" />
 								<label style="color: lightgrey; right: 0;" for="{{ form.password.label.text }}">{{ __('Password') }}</label>
 							</div>
+							<div class="offset-1 col-10 text-center form-floating mb-1">
+								<input type="submit" class="d-none" id="{{ form.submit.label.text }}" name="{{ form.submit.label.text }}" value="{{ __('Submit') }}" />
+							</div>
 						{%- else -%}
-								<input type="text" class="d-none" id="{{ form.password.label.text }}" name="{{ form.password.label.text }}" placeholder="{{ __('Password') }}" value="{{ form.password.data|default('', True) }}" />
+							<input type="text" class="d-none" id="{{ form.password.label.text }}" name="{{ form.password.label.text }}" placeholder="{{ __('Password') }}" value="{{ form.password.data|default('', True) }}" />
+							<div class="offset-1 col-10 text-center form-floating mb-1">
+								<input type="submit" class="btn btn-block btn-sm btn-outline-dark" id="{{ form.submit.label.text }}" name="{{ form.submit.label.text }}" value="{{ __('Submit') }}" />
+							</div>
 						{%- endif -%}
-						<div class="offset-1 col-10 text-center form-floating mb-1">
-							<input type="submit" class="btn btn-block btn-sm btn-outline-dark" id="{{ form.submit.label.text }}" name="{{ form.submit.label.text }}" value="{{ __('Submit') }}" />
-						</div>
 					</div>
 				</form>
 			</div>
