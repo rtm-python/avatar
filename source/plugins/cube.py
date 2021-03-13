@@ -10,7 +10,7 @@ SAVE_KWARGS = {
 	'optimize': True,
 	'duration': 125
 }
-COPY_FRAME_LIMIT = 100
+COPY_FRAME_LIMIT = 80
 
 
 class CubeFace():
