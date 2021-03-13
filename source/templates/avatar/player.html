@@ -5,7 +5,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
 {%- endblock -%}
 {%- block content -%}
-	<div class="ui-element" style="position: absolute; left: 0; top: 0; right: 0; padding: 0 1rem;">
+	<div class="ui-element" style="position: absolute; left: 0; top: 0; right: 0; padding: 0 1rem; z-index: 101;">
 		<div class="col-12 offset-md-1 col-md-10 offset-lg-2 col-lg-8">
 			<div class="d-flex w-100 justify-content-between mt-3">
 				<div class="d-flex align-items-center" style="border-radius: 2rem; background-color: rgba(255, 255, 255, 0.9); margin: 0 -0.5rem; padding: 0 0.5rem;">
@@ -16,8 +16,15 @@
 		</div>
 	</div>
 	<div class="d-flex align-items-center row" style="height: 100vh;">
-		<div class="avatar-list text-center">
-			<img class="avatar-face" src="" style="max-width: 100%; max-height: 100%; height: 100%;"/>
+		<div class="avatar-list text-center d-flex justify-content-center">
+			<div class="avatar-cube" style="transform-style: preserve-3d; width: 100vw; height: 100vh;">
+				<div class="side-left" style="position: absolute; opacity: 0.75;">
+					<img class="avatar-face" src="" style="max-width: 100%; max-height: 100%; height: 100%;"/>
+				</div>
+				<div class="side-right" style="position: absolute; opacity: 0.75;">
+					<img class="avatar-face" src="" style="max-width: 100%; max-height: 100%; height: 100%;"/>
+				</div>
+			</div>
 		</div>
 	</div>
 	<div class="d-none avatar-sample" id="">
@@ -29,7 +36,21 @@
 	<script type="text/javascript">
 		var user_uid = '';
 		var preloadCount = 0;
+		var	avatarCube = $(".avatar-cube")
+		var angle = 20;
+		var direction = 0.7;
 		$(window).on('load', function() {
+			// Prepare cube
+			var cubeSize = avatarCube.width();
+			if (avatarCube.width() > avatarCube.height()) {
+				cubeSize = avatarCube.height();
+			}
+			cubeSize = Math.ceil(cubeSize / 2);
+			avatarCube.css("width", cubeSize);
+			avatarCube.css("height", cubeSize);
+			$(".side-left").css("transform", "rotateY(-90deg) translate3d(0, 0, " + Math.ceil(cubeSize / 2).toString() + "px)");
+			$(".side-right").css("transform", "translate3d(0, 0, " + Math.ceil(cubeSize / 2).toString() + "px)");
+			setInterval(animate3d, 100);
 			// Prepare avatar page
 			$(".avatar-list").fadeTo(0, 0);
 			// SocketIO initiate
@@ -128,6 +149,30 @@
 				});
 				$(clone).appendTo($('[class*="avatar-list"]'));
 			}
+		}
+		function animate3d() {
+			angle += direction;
+			if (angle > 70) {
+				angle = 70;
+				direction = -0.7;
+			} else if (angle < 20) {
+				angle = 20;
+				direction = 0.7;
+			}
+			if (angle == 30 && direction < 0) {
+				direction = -0.8;
+			} else if (angle == 30 && direction > 0) {
+				direction = 0.9;
+			} else if (angle == 45 && direction > 0) {
+				direction = 1;
+			} else if (angle == 60 && direction > 0) {
+				direction = 0.8;
+			} else if (angle == 60 && direction < 0) {
+				direction = -0.9;
+			} else if (angle == 45 && direction < 0) {
+				direction = -1;
+			}
+			avatarCube.css("transform", "perspective(20cm) rotateY(" + angle.toString() + "deg)");
 		}
 	</script>
 {%- endblock -%}
