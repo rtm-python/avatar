@@ -26,14 +26,15 @@ class SoundfileStore(Store):
 
 	@staticmethod
 	def create(name: str, description: str,
-						 file: object, filetype: str) -> Soundfile:
+						 file: object, filetype: str,
+						 render: str) -> Soundfile:
 		"""
 		Create and return soundfile.
 		"""
 		return super(SoundfileStore, SoundfileStore).create(
 			Soundfile(
 				name, description, save_file(file), filetype,
-				datetime.utcnow(), False
+				datetime.utcnow(), False, render
 			)
 		)
 
@@ -106,6 +107,19 @@ class SoundfileStore(Store):
 			Soundfile, uid
 		)
 		soundfile.order_utc = order_utc
+		return super(SoundfileStore, SoundfileStore).update(
+			soundfile
+		)
+
+	@staticmethod
+	def apply_render(uid: str, render: str) -> Soundfile:
+		"""
+		Update order_utc and return soundfile.
+		"""
+		soundfile = super(SoundfileStore, SoundfileStore).read(
+			Soundfile, uid
+		)
+		soundfile.render = render
 		return super(SoundfileStore, SoundfileStore).update(
 			soundfile
 		)

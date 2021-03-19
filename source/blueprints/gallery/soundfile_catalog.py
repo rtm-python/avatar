@@ -73,8 +73,14 @@ class RendererForm(FlaskForm):
 		self.preset.choices = [('preset', 'Preset')] + \
 			[
 				(
-					filename[: len(filename) - 4], filename[: len(filename) - 4]
+					filename, filename[: len(filename) - 4]
 				) for filename in define_list(PLUGINS_PATH, '.gif')
+			]
+		self.preset.choices += \
+			[
+				(
+					filename, filename[: len(filename) - 4]
+				) for filename in define_list(PLUGINS_PATH, '.mp4')
 			]
 		for field in self:
 			if field.name != 'csrf_token':
@@ -206,7 +212,8 @@ def upload_soundfile():
 				form.filename.errors = ['Invalid value.']
 			else:
 				soundfile = SoundfileStore.create(
-					form.name.data, form.description.data, file, file.content_type
+					form.name.data, form.description.data, file, file.content_type,
+					RendererForm().preset.choices[1][0]
 				)
 				return redirect(url_for('gallery.get_soundfile_catalog'))
 	return render_template(
@@ -231,17 +238,10 @@ def update_soundfile(uid: str):
 			request.form.get(renderer.submit.label.text) is not None:
 		if renderer.preset.data != renderer.preset.choices[0][0] and \
 				renderer.duration.data is not None:
-			try:
-				duration = float(renderer.duration.data)
-			except Exception as exc:
-				duration = 0
-			if duration > 0:
-				preset_path = os.path.join(
-					PLUGINS_PATH, '%s.gif' % renderer.preset.data)
-				output_path = os.path.join(GIFS_PATH, uid)
-				frame_count = int(1000 / 125 * duration)
-				CubeFace.copy(preset_path, output_path, frame_count, 125)
-				return redirect(url_for('gallery.get_soundfile_catalog'))
+			SoundfileStore.apply_render(
+				uid, renderer.preset.data
+			)
+			return redirect(url_for('gallery.get_soundfile_catalog'))
 		is_renderer_post = True
 	# Handle soundfile form
 	form = SoundfileForm(

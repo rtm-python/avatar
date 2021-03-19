@@ -56,6 +56,7 @@ def handle_connect():
 	"""
 	Create or update avatar with sid_data for connected user.
 	"""
+	logging.debug('Trying to connect...')
 	avatar_list = AvatarStore.read_list(
 		1, 0, current_user.user.id, None, None
 	)

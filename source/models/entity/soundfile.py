@@ -26,10 +26,12 @@ class Soundfile(Entity):
 	filetype = Column(database.String, index=True, nullable=False)
 	order_utc = Column(database.DateTime, index=True, nullable=False)
 	used = Column(database.Boolean, index=True, nullable=False)
+	render = Column(database.String, index=True, nullable=True)
 
 	def __init__(self, name: str, description: str,
 							 filename: str, filetype: str,
-							 order_utc: datetime, used: bool) -> "Soundfile":
+							 order_utc: datetime, used: bool,
+							 render: str) -> "Soundfile":
 		'''
 		Initiate object and stores soundfile's data.
 		'''
@@ -40,3 +42,4 @@ class Soundfile(Entity):
 		self.filetype = filetype
 		self.order_utc = order_utc
 		self.used = used
+		self.render = render
