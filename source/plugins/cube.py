@@ -8,9 +8,27 @@ SAVE_KWARGS = {
 #	'loop': 0,
 	'save_all': True,
 	'optimize': True,
-	'duration': 125
+	'duration': 170
 }
-COPY_FRAME_LIMIT = 80
+COPY_FRAME_LIMIT = 75
+GAMMA = 0
+GAMMA_DIR = 1
+GAMMA_MAX = 85
+GAMMA_MIN = 0
+
+
+def get_gamma() -> float:
+	global GAMMA, GAMMA_DIR, GAMMA_MAX, GAMMA_MIN
+	GAMMA = GAMMA + GAMMA_DIR * randint(0, 10)
+	if GAMMA > GAMMA_MAX:
+		GAMMA = GAMMA_MAX
+		GAMMA_DIR = -1
+		GAMMA_MAX = randint(35, 85)
+	elif GAMMA < GAMMA_MIN:
+		GAMMA = GAMMA_MIN
+		GAMMA_DIR = 1
+		GAMMA_MIN = randint(-25, 25)
+	return GAMMA
 
 
 class CubeFace():
@@ -191,15 +209,15 @@ class CubeFace():
 			)
 			if do_cube:
 				cube_frame = CubeFace.cube_background(frame, cube_size)
-				frame = cv2.addWeighted(frame, 0.5, cube_frame, 0.7, 0.0)
-				if last_frame is not None:
-					sub_frame = cv2.addWeighted(frame, 0.5, last_frame, 0.6, 0.0)
-					image = Image.fromarray(cv2.cvtColor(sub_frame, cv2.COLOR_BGR2RGB))
-					image_list += [image.convert(mode='P', palette=Image.ADAPTIVE)]
-					cv2.imshow(output_name, sub_frame)
-					if cv2.waitKey(10) == 27 or len(image_list) >= image_count:
-						break
-				last_frame = cube_frame
+				frame = cv2.addWeighted(frame, 0.5, cube_frame, 0.5, get_gamma())
+#				if last_frame is not None:
+#					sub_frame = cv2.addWeighted(frame, 0.5, last_frame, 0.6, 0.0)
+#					image = Image.fromarray(cv2.cvtColor(sub_frame, cv2.COLOR_BGR2RGB))
+#					image_list += [image.convert(mode='P', palette=Image.ADAPTIVE)]
+#					cv2.imshow(output_name, sub_frame)
+#					if cv2.waitKey(10) == 27 or len(image_list) >= image_count:
+#						break
+#				last_frame = cube_frame
 			image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 			image_list += [image.convert(mode='P', palette=Image.ADAPTIVE)]
 			cv2.imshow(output_name, frame)
@@ -227,13 +245,13 @@ class CubeFace():
 			)
 			if do_cube:
 				cube_frame = CubeFace.cube_background(frame, cube_size)
-				frame = cv2.addWeighted(frame, 0.5, cube_frame, 0.7, 0.0)
-				if last_frame is not None:
-					sub_frame = cv2.addWeighted(frame, 0.5, last_frame, 0.6, 0.0)
-					cv2.imshow('background', sub_frame)
-					if cv2.waitKey(75) == 27:
-						break
-				last_frame = cube_frame
+				frame = cv2.addWeighted(frame, 0.5, cube_frame, 0.5, get_gamma())
+#				if last_frame is not None:
+#					sub_frame = cv2.addWeighted(frame, 0.6, last_frame, 0.6, 0)
+#					cv2.imshow('background', sub_frame)
+#					if cv2.waitKey(75) == 27:
+#						break
+#				last_frame = cube_frame
 			cv2.imshow('background', frame)
 			if cv2.waitKey(75) == 27:
 				break
@@ -244,7 +262,7 @@ class CubeFace():
 											pixel_size: int, border_size: int):
 		import cv2
 		light = 0
-		light_limit = 25
+		light_limit = 50
 		for x in range(0, cube_size, pixel_size):
 			for y in range(0, cube_size, pixel_size):
 				if randint(0, 10) > 5:
@@ -262,11 +280,12 @@ class CubeFace():
 					frame, (x, y), (x + pixel_size, y + pixel_size),
 					color, -1
 				)
-				color = (
-					color[0] + light,
-					color[1] + light,
-					color[2] + light
-				)
+#				color = (
+#					color[0] + light,
+#					color[1] + light,
+#					color[2] + light
+#				)
+				color = cube_color
 				cv2.rectangle(
 					frame, (x, y), (x + pixel_size, y + pixel_size),
 					color, border_size
@@ -319,13 +338,37 @@ class CubeFace():
 		sides = cv2.addWeighted(side_h, 1.0, side_v, 1.0, 0.0)
 		return cv2.addWeighted(sides, 1.0, side_back, 1.0, 0.0)
 
+	@staticmethod
+	def convert(input, output_path: str, frame_count: int) -> None:
+		import cv2
+		capture = cv2.VideoCapture(input)
+		if not capture.isOpened():
+			raise ValueError('Input source unavailable (%s)' % capture)
+		image_list = []
+		while True:
+			ret, frame = capture.read()
+			if not ret:
+				print('Input source read error (%s)' % caption)
+				break
+			image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+			image_list += [image.convert(mode='P', palette=Image.ADAPTIVE)]
+			cv2.imshow(output_path, frame)
+			if cv2.waitKey(10) == 27 or len(image_list) == frame_count:
+				break
+		cv2.destroyAllWindows()
+		image_list[0].save(
+			output_path, format='GIF', loop=0,
+			append_images=image_list[1:], palette=Image.ADAPTIVE, **SAVE_KWARGS
+		)
+		print('Write %s: %d frames' % (output_name, len(image_list)))
+
 
 if __name__ == '__main__':
 	dark_titan_color = (135, 120, 125)
 	pixel_size = 18
 	border_size = 3
 	cube_size = pixel_size * 36
-	choice = 2
+	choice = 4
 	if choice == 0:
 		CubeFace.copy('1000-face.gif', '100-face.gif', 100, 150)
 	elif choice == 1:
@@ -339,15 +382,28 @@ if __name__ == '__main__':
 			'background',
 			cube_size, dark_titan_color,
 			pixel_size, border_size,
-			do_cube=True, image_count=25
+			do_cube=True, image_count=50
 		)
 	elif choice == 3:
 		CubeFace.show_capture(
-			0, '1000-background.gif',
+			0, '50-background.gif',
 			cube_size, dark_titan_color, pixel_size // 2
 		)
 	elif choice == 4:
 		CubeFace.write_capture(
-			'face', 0, '1000-background.gif',
-			cube_size, dark_titan_color, pixel_size // 2, image_count=100
+			'face', 0, '50-background.gif',
+			cube_size, dark_titan_color, pixel_size // 2, image_count=75
 		)
+	elif choice == 5:
+		CubeFace.convert(
+			'/home/rt/Downloads/devushka_2.mp4', 'cube.gif', 1000
+		)
+	elif choice == 6:
+		CubeFace.show_capture(
+			'/home/rt/Downloads/woman.mp4', '100-background.gif',
+			cube_size, dark_titan_color, pixel_size // 2
+		)
+#<video loop="" autoplay="" width="100%" height="100%">
+#  <source type="video/mp4" src="/gallery/soundfile/catalog/image/proba_1.mp4/">
+#  Your browser does not support the video tag.
+#  </video>

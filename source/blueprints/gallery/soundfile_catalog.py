@@ -256,10 +256,11 @@ def update_soundfile(uid: str):
 			if (file is None or file.filename == '' or \
 					file.content_type not in CONFIG['database']['allowed_types']
 					) and not form.filename.data.startswith('#'):
-				form.filename.errors = ['Invalid value.']
-			SoundfileStore.update(
-				uid, form.name.data, form.description.data, file, file.content_type
-			)
+				logging.debug('Leave previous saved file')
+			else:
+				SoundfileStore.update(
+					uid, form.name.data, form.description.data, file, file.content_type
+				)
 			return redirect(url_for('gallery.get_soundfile_catalog'))
 	return render_template(
 		'gallery/soundfile.html',
