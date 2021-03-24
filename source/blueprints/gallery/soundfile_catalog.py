@@ -31,6 +31,7 @@ from flask import render_template
 from flask import request
 from flask import redirect
 from flask import url_for
+from flask import abort
 from flask_wtf import FlaskForm
 from wtforms import validators
 from wtforms import StringField
@@ -308,12 +309,15 @@ def get_audio(filename: str):
 	return send_file(filename)
 
 
+@blueprint.route('/soundfile/catalog/image/', methods=('GET',))
 @blueprint.route('/soundfile/catalog/image/<filename>/', methods=('GET',))
 @permission_required
-def get_image(filename: str):
+def get_image(filename: str = None):
 	"""
 	Return image file.
 	"""
 	if not current_user.is_authenticated:
 		abort(403)
+	if filename is None:
+		return abort(404)
 	return blueprints.send_image(filename)
