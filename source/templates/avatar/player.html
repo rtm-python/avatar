@@ -19,11 +19,13 @@
 		<div class="avatar-list text-center d-flex justify-content-center">
 			<div class="avatar-cube" style="transform-style: preserve-3d; width: 100vw; height: 100vh;">
 				<img class="avatar-face" src="" style="max-width: 100%; max-height: 100%; height: 100%;"/>
+				<video loop="" autoplay="" class="avatar-face" style="max-width: 100%; max-height: 100%; height: 100%;" type="video/mp4" src=""></video>
 			</div>
 		</div>
 	</div>
 	<div class="d-none avatar-sample" id="">
 		<img src="" alt=""/>
+		<video preload="auto" src="" type="video/mp4"></video>
 		<audio preload="auto"><source src="" type=""></audio>
 	</div>
 {%- endblock -%}
@@ -58,7 +60,8 @@
 					});
 				} else {
 					$(".avatar-list").fadeTo(500, 0);
-					$(".avatar-face").attr("src", "");
+					$("img.avatar-face").attr("src", "");
+					$("video.avatar-face").attr("src", "");
 					$('[class*="avatar-item"]').each(function() {
 						var uid = $(this).attr("id");
 						console.log(uid + ' clearing...');
@@ -78,10 +81,19 @@
 			socket.on('play_data', function(data, callback) {
 				$("#loadSpinner").show();
 				$(".avatar-list").fadeTo(0, 0);
-				$(".avatar-face").attr("src", "");
+				$("img.avatar-face").attr("src", "");
+				$("video.avatar-face").attr("src", "");
 				console.log(data.uid + " play starting...");
 				loadData(data);
-				$(".avatar-face").attr("src", data.image.src);
+				if (data.image.src.endsWith(".gif/")) {
+					$("img.avatar-face").attr("src", data.image.src);
+					$("img.avatar-face").show();
+					$("video.avatar-face").hide();
+				} else {
+					$("video.avatar-face").attr("src", data.image.src);
+					$("video.avatar-face").show();
+					$("img.avatar-face").hide();
+				}
 				$(".avatar-list").fadeTo(1000, 1);
 				$("#" + data.uid).children("audio")[0].play();
 				if (callback) callback(data.uid + " playing...");
@@ -103,7 +115,11 @@
 				$(clone).attr("id", data.uid);
 				$(clone).attr("class", "d-none avatar-item");
 				preloadCount++;
-				$(clone).children("img").attr("src", data.image.src);
+				if (data.image.src.endsWith(".gif/")) {
+					$(clone).children("img").attr("src", data.image.src);
+				} else {
+					$(clone).children("video").attr("src", data.image.src);
+				}
 				$(clone).children("img").on('load', function() {
 					preloadCount--;
 					if (preloadCount == 0) {

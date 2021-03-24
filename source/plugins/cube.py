@@ -8,7 +8,8 @@ SAVE_KWARGS = {
 #	'loop': 0,
 	'save_all': True,
 	'optimize': True,
-	'duration': 170
+	'duration': 85,
+	'transparent': 0
 }
 COPY_FRAME_LIMIT = 75
 GAMMA = 0
@@ -65,45 +66,58 @@ class CubeFace():
 	@staticmethod
 	def write_capture(output_name: str, input, background_filename: str,
 										cube_size: int, cube_color: tuple, pixel_size: int,
-										image_count: int = 1000):
+										image_count: int = 1000, do_mask: bool = False):
 		import cv2
 		capture = cv2.VideoCapture(input)
 		if not capture.isOpened():
 			raise ValueError('Input source unavailable (%s)' % capture)
-		background = cv2.VideoCapture(background_filename)
-		if not background.isOpened():
-			raise ValueError(
-				'Background source unavailable (%s)' % background_filename)
-		cubed_size = cube_size // pixel_size
 		pixel_weight = int(256 // pixel_size * 1.1)
-		else_color = (
-			cube_color[0] // 2, cube_color[1] // 2, cube_color[2] // 2
-		)
+		if not do_mask:
+			background = cv2.VideoCapture(background_filename)
+			if not background.isOpened():
+				raise ValueError(
+					'Background source unavailable (%s)' % background_filename)
+			cubed_size = cube_size // pixel_size
+			else_color = (
+				cube_color[0] // 2, cube_color[1] // 2, cube_color[2] // 2
+			)
+		else:
+			cubed_size = cube_size // pixel_size
+			else_color = (0, 0, 0)
 		image_list = []
 		while True:
 			ret, frame = capture.read()
 			if not ret:
 				print('Input source read error (%s)' % caption)
 				break
-			ret, bg_frame = background.read()
-			if not ret:
-				print('Background source read error (%s)' % background_filename)
-				background = cv2.VideoCapture(background_filename)
-				if not background.isOpened():
-					raise ValueError(
-						'Background source unavailable (%s)' % background_filename)
+			if not do_mask:
 				ret, bg_frame = background.read()
 				if not ret:
 					print('Background source read error (%s)' % background_filename)
-					break
-			face = CubeFace.draw_face(
-				cv2.resize(frame, (cubed_size, cubed_size)),
-				cube_size, cube_color, pixel_size, pixel_weight, else_color
-			)
-			frame = cv2.addWeighted(face, 1.0, bg_frame, 0.5, 0.0)
+					background = cv2.VideoCapture(background_filename)
+					if not background.isOpened():
+						raise ValueError(
+							'Background source unavailable (%s)' % background_filename)
+					ret, bg_frame = background.read()
+					if not ret:
+						print('Background source read error (%s)' % background_filename)
+						break
+				face = CubeFace.draw_face(
+					cv2.resize(frame, (cubed_size, cubed_size)),
+					cube_size, cube_color, pixel_size, pixel_weight, else_color
+				)
+				frame = cv2.addWeighted(face, 1.0, bg_frame, 0.5, 0.0)
+				cv2.imshow(output_name, cv2.flip(frame, 1))
+			else:
+				face = CubeFace.draw_mask(
+					cv2.resize(frame, (cubed_size, cubed_size)),
+					cube_size, cube_color, pixel_size, pixel_weight, else_color
+				)
+				frame = face
+				cv2.imshow(output_name, frame)
 			image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-			image_list += [image.convert(mode='P', palette=Image.ADAPTIVE)]
-			cv2.imshow(output_name, cv2.flip(frame, 1))
+#			image_list += [image.convert(mode='P', palette=Image.ADAPTIVE)]
+			image_list += [image]
 			if cv2.waitKey(10) == 27 or len(image_list) == image_count:
 				break
 		cv2.destroyAllWindows()
@@ -115,42 +129,55 @@ class CubeFace():
 
 	@staticmethod
 	def show_capture(input, background_filename: str,
-									 cube_size: int, cube_color: tuple, pixel_size: int):
+									 cube_size: int, cube_color: tuple, pixel_size: int,
+									 do_mask: bool = False):
 		import cv2
 		capture = cv2.VideoCapture(input)
 		if not capture.isOpened():
 			raise ValueError('Input source unavailable (%s)' % capture)
-		background = cv2.VideoCapture(background_filename)
-		if not background.isOpened():
-			raise ValueError(
-				'Background source unavailable (%s)' % background_filename)
-		cubed_size = cube_size // pixel_size
+		if not do_mask:
+			background = cv2.VideoCapture(background_filename)
+			if not background.isOpened():
+				raise ValueError(
+					'Background source unavailable (%s)' % background_filename)
+			cubed_size = cube_size // pixel_size
+			else_color = (
+				cube_color[0] // 2, cube_color[1] // 2, cube_color[2] // 2
+			)
+		else:
+			cubed_size = cube_size // pixel_size
+			else_color = (0, 255, 0)
 		pixel_weight = int(256 // pixel_size * 1.1)
-		else_color = (
-			cube_color[0] // 2, cube_color[1] // 2, cube_color[2] // 2
-		)
 		while True:
 			ret, frame = capture.read()
 			if not ret:
-				print('Input source read error (%s)' % caption)
+				print('Input source read error (%s)' % '')
 				break
-			ret, bg_frame = background.read()
-			if not ret:
-				print('Background source read error (%s)' % background_filename)
-				background = cv2.VideoCapture(background_filename)
-				if not background.isOpened():
-					raise ValueError(
-						'Background source unavailable (%s)' % background_filename)
+			if not do_mask:
 				ret, bg_frame = background.read()
 				if not ret:
 					print('Background source read error (%s)' % background_filename)
-					break
-			face = CubeFace.draw_face(
-				cv2.resize(frame, (cubed_size, cubed_size)),
-				cube_size, cube_color, pixel_size, pixel_weight, else_color
-			)
-			frame = cv2.addWeighted(face, 1.0, bg_frame, 0.5, 0.0)
-			cv2.imshow('face', cv2.flip(frame, 1))
+					background = cv2.VideoCapture(background_filename)
+					if not background.isOpened():
+						raise ValueError(
+							'Background source unavailable (%s)' % background_filename)
+					ret, bg_frame = background.read()
+					if not ret:
+						print('Background source read error (%s)' % background_filename)
+						break
+				face = CubeFace.draw_face(
+					cv2.resize(frame, (cubed_size, cubed_size)),
+					cube_size, cube_color, pixel_size, pixel_weight, else_color
+				)
+				frame = cv2.addWeighted(face, 1.0, bg_frame, 0.5, 0.0)
+				cv2.imshow('face', cv2.flip(frame, 1))
+			else:
+				face = CubeFace.draw_mask(
+					cv2.resize(frame, (cubed_size, cubed_size)),
+					cube_size, cube_color, pixel_size, pixel_weight, else_color
+				)
+				frame = face
+				cv2.imshow('face', frame)
 			if cv2.waitKey(10) == 27:
 				break
 		cv2.destroyAllWindows()
@@ -183,6 +210,43 @@ class CubeFace():
 					(x - half_width, y - half_width),
 					(x + else_width, y + half_width),
 					cube_color, -1
+				)
+#			radius = pixel // pixel_weight
+#			cv2.circle(face, (x, y), radius, cube_color, -1)
+			x += pixel_size
+			if x >= cube_size:
+				x = half_pixel_size
+				y += pixel_size
+		return face
+
+	@staticmethod
+	def draw_mask(frame, cube_size: int, cube_color: tuple,
+								pixel_size: int, pixel_weight: int, else_color: tuple):
+		import cv2
+		face = numpy.full(
+			(cube_size, cube_size, 3),
+			else_color, dtype=numpy.uint8
+		)
+#		frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+		half_pixel_size = pixel_size // 2
+		x = half_pixel_size
+		y = half_pixel_size
+		for pixel in Image.fromarray(frame).getdata():
+			width = (pixel[0] + pixel[1] + pixel[2]) // 3 // pixel_weight
+			if width > 1:
+				half_width = width // 2
+				else_width = width - half_width
+#				cv2.rectangle(
+#					face,
+#					(x - half_pixel_size, y - half_pixel_size),
+#					(x + half_pixel_size, y + half_pixel_size),
+#					pixel, -1
+#				)
+				cv2.rectangle(
+					face,
+					(x - half_width, y - half_width),
+					(x + else_width, y + half_width),
+					pixel, -1
 				)
 #			radius = pixel // pixel_weight
 #			cv2.circle(face, (x, y), radius, cube_color, -1)
@@ -368,7 +432,7 @@ if __name__ == '__main__':
 	pixel_size = 18
 	border_size = 3
 	cube_size = pixel_size * 36
-	choice = 4
+	choice = 5
 	if choice == 0:
 		CubeFace.copy('1000-face.gif', '100-face.gif', 100, 150)
 	elif choice == 1:
@@ -396,14 +460,25 @@ if __name__ == '__main__':
 		)
 	elif choice == 5:
 		CubeFace.convert(
-			'/home/rt/Downloads/devushka_2.mp4', 'cube.gif', 1000
+			'/home/rt/Downloads/new-face.mp4', 'new_face.gif', 1000
 		)
 	elif choice == 6:
 		CubeFace.show_capture(
 			'/home/rt/Downloads/woman.mp4', '100-background.gif',
 			cube_size, dark_titan_color, pixel_size // 2
 		)
-#<video loop="" autoplay="" width="100%" height="100%">
+	elif choice == 7:
+		CubeFace.show_capture(
+			0, '100-background.gif',
+			cube_size, dark_titan_color, pixel_size // 4, do_mask=True
+		)
+	elif choice == 8:
+		CubeFace.write_capture(
+			'face', 0, '50-background.gif',
+			cube_size, dark_titan_color, pixel_size // 4, image_count=300,
+			do_mask=True
+		)
+# <video loop="" autoplay="" width="100%" height="100%">
 #  <source type="video/mp4" src="/gallery/soundfile/catalog/image/proba_1.mp4/">
 #  Your browser does not support the video tag.
-#  </video>
+# </video>
