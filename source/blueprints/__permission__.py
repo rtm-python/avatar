@@ -112,7 +112,7 @@ def configure_permissions():
 			choices = ['0: Exit'] + [
 				'%d: %s (last login: %s) %s' % (
 					index,
-					' '.join([user.first_name, user.last_name]),
+					' '.join([user.first_name or '', user.last_name or '']),
 					user.modified_utc,
 					user.uid
 				) for index, user in enumerate(users, start=1)
